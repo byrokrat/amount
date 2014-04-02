@@ -1,0 +1,22 @@
+{
+    "name": "ledgr/amount",
+    "description": "Handle monetary amounts using bcmath for arithmetic precision",
+    "keywords": ["monetary amount", "economics"],
+    "homepage": "https://github.com/ledgr/amount",
+    "type": "library",
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "Hannes Forsgård",
+            "email": "hannes.forsgard@fripost.org"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "ledgr\\amount\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=5.3.0"
+    }
+}
