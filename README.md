@@ -3,8 +3,6 @@
 
 Handle monetary amounts using bcmath for arithmetic precision
 
-**License**: [GPL](/LICENSE)
-
 
 Installation using [composer](http://getcomposer.org/)
 ------------------------------------------------------

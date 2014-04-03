@@ -4,7 +4,7 @@
     "keywords": ["monetary amount", "economics"],
     "homepage": "https://github.com/ledgr/amount",
     "type": "library",
-    "license": "GPL",
+    "license": "WTFPL",
     "authors": [
         {
             "name": "Hannes Forsgård",
