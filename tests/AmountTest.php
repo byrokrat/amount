@@ -35,20 +35,16 @@ class AmountTest extends \PHPUnit_Framework_TestCase
     public function amountProvider()
     {
         return array(
-            array(2, '100.00', '100.00', 100.00, '10000', 100, true),
-
-            // OJ! Det här verkar vara en bugg! signal ska väll alltid ha 2 decimaler!!!!
-            //array(1, '100.0', '100.0', 100.0, '10000', 100, true),
-
-            // OJ! Det här verkar också vara en bugg! Ska det inte gå att ställa precision till 0???
-            //array(0, '100', '100', 100, '10000', 100, true),
-
-            // OJ! Det här verkar också vara en ugg! Signal ska väll alltid ha 2 decimaler!!!
-            //array(3, '100.000', '100.000', 100.000, '10000', 100, true),
+            array(0, '100',     '100',     100.,    '10000', 100, true),
+            array(1, '100.0',   '100.0',   100.0,   '10000', 100, true),
+            array(2, '100.00',  '100.00',  100.00,  '10000', 100, true),
+            array(3, '100.000', '100.000', 100.000, '10000', 100, true),
 
             array(2, '123.23', '123.23', 123.23, '12323', 123, false),
             array(2, '123.99', '123.99', 123.99, '12399', 123, false),
+
             array(2, '0.23', '0.23', 0.23, '023', 0, false),
+
             array(2, '-123.20', '-123.20', -123.20, '1232å', -123, false),
             array(2, '-123.21', '-123.21', -123.21, '1232J', -123, false),
             array(2, '-123.22', '-123.22', -123.22, '1232K', -123, false),
@@ -74,6 +70,7 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 
         $a->setFloat(123.119);
         $this->assertSame(123.12, $a->getFloat());
+        $this->assertSame(123.119, $a->getFloat(3));
         $this->assertSame("123.11", $a->getString());
 
         $a->setFloat(-123.111);
@@ -97,6 +94,7 @@ class AmountTest extends \PHPUnit_Framework_TestCase
         $a->setString('123.119');
         $this->assertSame(123.12, $a->getFloat());
         $this->assertSame("123.11", $a->getString());
+        $this->assertSame("123.119", $a->getString(3));
 
         $a->setString('-123.141');
         $this->assertSame("-123.14", $a->getString());
@@ -169,6 +167,8 @@ class AmountTest extends \PHPUnit_Framework_TestCase
         setlocale(LC_MONETARY, 'C');
         $a = new Amount();
         $this->assertSame(2, $a->getPrecision());
+
+        $this->assertSame(100, $a->getPrecision(-100));
     }
 
     public function testEqualsLesserGreaterThan()
