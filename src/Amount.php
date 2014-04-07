@@ -178,7 +178,7 @@ class Amount
     /**
      * Set amount from string
      *
-     * @param  stringt                $str
+     * @param  string                 $str
      * @return Amount                 Instance for chaining
      * @throws InvalidAmountException If $str is not a numerical string
      */
@@ -289,7 +289,7 @@ class Amount
      */
     public function isSignalString($str)
     {
-        return preg_match("/^\d+(å|[JKLMNOPQR])?$/", $str);
+        return !!preg_match("/^\d+(å|[JKLMNOPQR])?$/", $str);
     }
 
     /**
