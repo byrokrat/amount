@@ -3,13 +3,13 @@ namespace ledgr\amount;
 
 class AmountTest extends \PHPUnit_Framework_TestCase
 {
-    public function assertAmount(Amount $a, $str, $toStr, $float, $signal, $int)
+    public function assertAmount(Amount $amount, $str, $toStr, $float, $signal, $int)
     {
-        $this->assertSame($str, $a->getString(), 'string');
-        $this->assertSame($toStr, (string)$a, '__tostring');
-        $this->assertSame($float, $a->getFloat(), 'float');
-        $this->assertSame($signal, $a->getSignalString(), 'signal');
-        $this->assertSame($int, $a->getInt(), 'int');
+        $this->assertSame($str, $amount->getString(), 'string');
+        $this->assertSame($toStr, (string)$amount, '__tostring');
+        $this->assertSame($float, $amount->getFloat(), 'float');
+        $this->assertSame($signal, $amount->getSignalString(), 'signal');
+        $this->assertSame($int, $amount->getInt(), 'int');
     }
 
     /**
@@ -17,18 +17,18 @@ class AmountTest extends \PHPUnit_Framework_TestCase
      */
     public function testAmounts($precision, $str, $toStr, $float, $signal, $int, $intSafe)
     {
-        $a = new Amount($str, $precision);
-        $this->assertAmount($a, $str, $toStr, $float, $signal, $int);
+        $amount = new Amount($str, $precision);
+        $this->assertAmount($amount, $str, $toStr, $float, $signal, $int);
 
-        $a->setFloat($float);
-        $this->assertAmount($a, $str, $toStr, $float, $signal, $int);
+        $amount->setFloat($float);
+        $this->assertAmount($amount, $str, $toStr, $float, $signal, $int);
 
-        $a->setSignalString($signal);
-        $this->assertAmount($a, $str, $toStr, $float, $signal, $int);
+        $amount->setSignalString($signal);
+        $this->assertAmount($amount, $str, $toStr, $float, $signal, $int);
 
         if ($intSafe) {
-            $a->setInt($int);
-            $this->assertAmount($a, $str, $toStr, $float, $signal, $int);
+            $amount->setInt($int);
+            $this->assertAmount($amount, $str, $toStr, $float, $signal, $int);
         }
     }
 
@@ -60,149 +60,148 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 
     public function testFloatRounding()
     {
-        $a = new Amount('0', 2);
+        $amount = new Amount('0', 2);
 
-        $a->setFloat(123.0);
-        $this->assertSame(123.00, $a->getFloat());
+        $amount->setFloat(123.0);
+        $this->assertSame(123.00, $amount->getFloat());
 
-        $a->setFloat(123.111);
-        $this->assertSame(123.11, $a->getFloat());
+        $amount->setFloat(123.111);
+        $this->assertSame(123.11, $amount->getFloat());
 
-        $a->setFloat(123.119);
-        $this->assertSame(123.12, $a->getFloat());
-        $this->assertSame(123.119, $a->getFloat(3));
-        $this->assertSame("123.11", $a->getString());
+        $amount->setFloat(123.119);
+        $this->assertSame(123.12, $amount->getFloat());
+        $this->assertSame(123.119, $amount->getFloat(3));
+        $this->assertSame("123.11", $amount->getString());
 
-        $a->setFloat(-123.111);
-        $this->assertSame(-123.11, $a->getFloat());
+        $amount->setFloat(-123.111);
+        $this->assertSame(-123.11, $amount->getFloat());
 
-        $a->setFloat(-123.119);
-        $this->assertSame(-123.12, $a->getFloat());
-        $this->assertSame("-123.11", $a->getString());
+        $amount->setFloat(-123.119);
+        $this->assertSame(-123.12, $amount->getFloat());
+        $this->assertSame("-123.11", $amount->getString());
     }
 
     public function testStringRounding()
     {
-        $a = new Amount('0', 2);
+        $amount = new Amount('0', 2);
 
-        $a->setString('123.0');
-        $this->assertSame("123.00", $a->getString());
+        $amount->setString('123.0');
+        $this->assertSame("123.00", $amount->getString());
 
-        $a->setString('123.111');
-        $this->assertSame("123.11", $a->getString());
+        $amount->setString('123.111');
+        $this->assertSame("123.11", $amount->getString());
 
-        $a->setString('123.119');
-        $this->assertSame(123.12, $a->getFloat());
-        $this->assertSame("123.11", $a->getString());
-        $this->assertSame("123.119", $a->getString(3));
+        $amount->setString('123.119');
+        $this->assertSame(123.12, $amount->getFloat());
+        $this->assertSame("123.11", $amount->getString());
+        $this->assertSame("123.119", $amount->getString(3));
 
-        $a->setString('-123.141');
-        $this->assertSame("-123.14", $a->getString());
+        $amount->setString('-123.141');
+        $this->assertSame("-123.14", $amount->getString());
 
-        $a->setString('-123.149');
-        $this->assertSame(-123.15, $a->getFloat());
-        $this->assertSame("-123.14", $a->getString());
+        $amount->setString('-123.149');
+        $this->assertSame(-123.15, $amount->getFloat());
+        $this->assertSame("-123.14", $amount->getString());
     }
 
     public function testAdd()
     {
-        $a = new Amount('100', 2);
+        $amount = new Amount('100', 2);
 
-        $a->add(new Amount('50'));
-        $this->assertSame('150.00', $a->getString());
+        $amount->add(new Amount('50'));
+        $this->assertSame('150.00', $amount->getString());
 
-        $a->add(new Amount('-100'));
-        $this->assertSame('50.00', $a->getString());
+        $amount->add(new Amount('-100'));
+        $this->assertSame('50.00', $amount->getString());
 
-        $a->add(new Amount('-100'));
-        $this->assertSame('-50.00', $a->getString());
+        $amount->add(new Amount('-100'));
+        $this->assertSame('-50.00', $amount->getString());
     }
 
     public function testSubtract()
     {
-        $a = new Amount('99');
-        $a->subtract(new Amount('100.50'));
-        $a->setPrecision(2);
-        $this->assertSame('-1.50', $a->getString());
+        $amount = new Amount('99');
+        $amount->subtract(new Amount('100.50'));
+        $amount->setPrecision(2);
+        $this->assertSame('-1.50', $amount->getString());
     }
 
     public function testMultiplyWith()
     {
-        $a = new Amount('10');
-        $a->multiplyWith(new Amount('10'));
-        $a->setPrecision(0);
-        $this->assertSame('100', $a->getString());
+        $amount = new Amount('10');
+        $amount->multiplyWith(new Amount('10'));
+        $amount->setPrecision(0);
+        $this->assertSame('100', $amount->getString());
     }
 
     public function testDivideBy()
     {
-        $a = new Amount('10');
-        $a->divideBy(new Amount('10'));
-        $a->setPrecision(0);
-        $this->assertSame('1', $a->getString());
+        $amount = new Amount('10');
+        $amount->divideBy(new Amount('10'));
+        $amount->setPrecision(0);
+        $this->assertSame('1', $amount->getString());
     }
 
     public function testInvert()
     {
-        $a = new Amount('50.50');
-        $a->invert();
-        $a->setPrecision(2);
-        $this->assertSame('-50.50', $a->getString());
+        $amount = new Amount('50.50');
+        $amount->invert();
+        $amount->setPrecision(2);
+        $this->assertSame('-50.50', $amount->getString());
     }
 
     public function testPrecision()
     {
-        $a = new Amount('35', 10);
-        $b = new Amount('-34.99');
-        $a->add($b);
-        $this->assertSame('0.0100000000', $a->getString());
+        $amount = new Amount('35', 10);
+        $amount->add(new Amount('-34.99'));
+        $this->assertSame('0.0100000000', $amount->getString());
     }
 
     public function testGetPrecision()
     {
-        $a = new Amount();
-        $a->setPrecision(10);
-        $this->assertSame(10, $a->getPrecision());
+        $amount = new Amount();
+        $amount->setPrecision(10);
+        $this->assertSame(10, $amount->getPrecision());
 
         setlocale(LC_MONETARY, 'C');
-        $a = new Amount();
-        $this->assertSame(2, $a->getPrecision());
+        $amount = new Amount();
+        $this->assertSame(2, $amount->getPrecision());
 
-        $this->assertSame(100, $a->getPrecision(-100));
+        $this->assertSame(100, $amount->getPrecision(-100));
     }
 
     public function testEqualsLesserGreaterThan()
     {
-        $a = new Amount('100');
+        $amount = new Amount('100');
 
-        $this->assertTrue($a->equals(new Amount('100')));
-        $this->assertTrue($a->isLesserThan(new Amount('150')));
-        $this->assertTrue($a->isGreaterThan(new Amount('50')));
+        $this->assertTrue($amount->equals(new Amount('100')));
+        $this->assertTrue($amount->isLesserThan(new Amount('150')));
+        $this->assertTrue($amount->isGreaterThan(new Amount('50')));
 
-        $this->assertFalse($a->equals(new Amount('1000')));
-        $this->assertFalse($a->isLesserThan(new Amount('50')));
-        $this->assertFalse($a->isGreaterThan(new Amount('150')));
+        $this->assertFalse($amount->equals(new Amount('1000')));
+        $this->assertFalse($amount->isLesserThan(new Amount('50')));
+        $this->assertFalse($amount->isGreaterThan(new Amount('150')));
     }
 
     public function testSetEmptyString()
     {
-        $a = new Amount('');
-        $this->assertTrue($a->equals(new Amount('0.0')));
+        $amount = new Amount('');
+        $this->assertTrue($amount->equals(new Amount('0.0')));
     }
 
     public function testFormat()
     {
-        $a = new Amount('10000.5', 2);
-        $this->assertSame('10000.50', $a->format('%!^n'));
+        $amount = new Amount('10000.5', 2);
+        $this->assertSame('10000.50', $amount->format('%!^n'));
     }
 
     public function testSetLocaleString()
     {
-        $a = new Amount('0', 2);
-        $a->setLocaleString('10000.00');
-        $this->assertSame('10000.00', $a->getRawString());
-        $a->setLocaleString('-10 000,00', ',', ' ');
-        $this->assertSame('-10000.00', $a->getRawString());
+        $amount = new Amount('0', 2);
+        $amount->setLocaleString('10000.00');
+        $this->assertSame('10000.00', $amount->getRawString());
+        $amount->setLocaleString('-10 000,00', ',', ' ');
+        $this->assertSame('-10000.00', $amount->getRawString());
     }
 
     /**
@@ -218,8 +217,8 @@ class AmountTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidFloat()
     {
-        $a = new Amount();
-        $a->setFloat(1);
+        $amount = new Amount();
+        $amount->setFloat(1);
     }
 
     /**
@@ -227,8 +226,8 @@ class AmountTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidInt()
     {
-        $a = new Amount();
-        $a->setInt(1.0);
+        $amount = new Amount();
+        $amount->setInt(1.0);
     }
 
     /**
@@ -236,8 +235,8 @@ class AmountTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidString()
     {
-        $a = new Amount();
-        $a->setString('sdf');
+        $amount = new Amount();
+        $amount->setString('sdf');
     }
 
     /**
@@ -245,25 +244,25 @@ class AmountTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidSignal()
     {
-        $a = new Amount();
-        $a->setSignalString('Q123Q');
+        $amount = new Amount();
+        $amount->setSignalString('Q123Q');
     }
 
     public function testHasValue()
     {
-        $a = new Amount('0');
-        $this->assertFalse($a->hasValue());
+        $amount = new Amount('0');
+        $this->assertFalse($amount->hasValue());
 
-        $b = new Amount('-10');
-        $this->assertTrue($b->hasValue());
+        $amount = new Amount('-10');
+        $this->assertTrue($amount->hasValue());
     }
 
     public function testChaining()
     {
-        $a = new Amount('0');
+        $amount = new Amount('0');
         $this->assertSame(
             '10',
-            $a->subtract(new Amount('10'))->invert()->setPrecision(0)->getString()
+            $amount->subtract(new Amount('10'))->invert()->setPrecision(0)->getString()
         );
     }
 }

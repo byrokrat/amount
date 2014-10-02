@@ -9,11 +9,11 @@
 
 namespace ledgr\amount;
 
-use InvalidArgumentException;
-
 /**
+ * Exception thrown when amount is invalid
+ *
  * @author Hannes Forsgård <hannes.forsgard@fripost.org>
  */
-class InvalidAmountException extends InvalidArgumentException implements Exception
+class InvalidAmountException extends \InvalidArgumentException implements Exception
 {
 }

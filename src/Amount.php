@@ -114,7 +114,7 @@ class Amount
      * string may involve rounding and yield unexpected results. To keep
      * precision use setString() instead.
      *
-     * @param  float                  $int
+     * @param  int                    $int
      * @return Amount                 Instance for chaining
      * @throws InvalidAmountException If $int is not an integer
      */

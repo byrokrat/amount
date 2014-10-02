@@ -10,6 +10,8 @@
 namespace ledgr\amount;
 
 /**
+ * Base exception, all thrown exceptions implements this interface
+ *
  * @author Hannes Forsgård <hannes.forsgard@fripost.org>
  */
 interface Exception
