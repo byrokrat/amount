@@ -55,11 +55,104 @@ class Amount
      */
     public function __construct($amount = '0', $precision = null)
     {
-        $this->setString($amount);
+        if (!is_string($amount) || !is_numeric($amount)) {
+            throw new InvalidAmountException("Amount must be a numerical string");
+        }
+
+        $this->amount = $amount;
 
         if (is_int($precision)) {
             $this->setPrecision($precision);
         }
+    }
+
+    /**
+     * Get the raw stored amount
+     *
+     * @return string
+     */
+    public function getAmount()
+    {
+        return $this->amount;
+    }
+
+    /**
+     * Get amount as a non-locale aware string
+     *
+     * The number of decimal digits returned is set using setPrecision() or the
+     * $precision parameter.
+     *
+     * @param  int $precision Decimal precision, defaults to loaded value
+     * @return string
+     */
+    public function getString($precision = null)
+    {
+        return bcadd($this->getAmount(), '0.0', $this->getPrecision($precision));
+    }
+
+    /**
+     * Get amount as a non-locale aware string
+     *
+     * The number of decimal digits returned is set using setPrecision().
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getString();
+    }
+
+    /**
+     * Get amount as integer
+     *
+     * Amount is evaluated using intval
+     *
+     * @return int
+     */
+    public function getInt()
+    {
+        return intval($this->getAmount());
+    }
+
+    /**
+     * Get amount as float
+     *
+     * Note that amount internally is stored as a string. Converting to floating
+     * point number may lead to a loss of precision.
+     *
+     * @param  int   $precision Decimal precision. Defaults to loaded value.
+     * @return float
+     */
+    public function getFloat($precision = null)
+    {
+        return (float)round(floatval($this->getAmount()), $this->getPrecision($precision));
+    }
+
+    /**
+     * Get amount as signal string
+     *
+     * Signal strings does not contain a decimal digit separator. Instead the
+     * last two digits are always considered decimals. For negative values the
+     * last digit is converted to an alphabetic character. See setSignalString()
+     * for a futher description.
+     *
+     * @return string
+     */
+    public function getSignalString()
+    {
+        $arAmount = str_split($this->getString(2));
+
+        // Convert negative values
+        if ($arAmount[0] == '-') {
+            // Shift off sign
+            array_shift($arAmount);
+            // Set singal character
+            $last = count($arAmount) -1;
+            $arAmount[$last] = self::$signals[$arAmount[$last]];
+        }
+
+        // Remove decimal digit separator
+        return str_replace('.', '', implode('', $arAmount));
     }
 
     /**
@@ -111,8 +204,7 @@ class Amount
      * Set amount from integer
      *
      * Note that amount internally is stored as a string. Converting number to
-     * string may involve rounding and yield unexpected results. To keep
-     * precision use setString() instead.
+     * string may involve rounding and yield unexpected results.
      *
      * @param  int                    $int
      * @return Amount                 Instance for chaining
@@ -129,23 +221,10 @@ class Amount
     }
 
     /**
-     * Get amount as integer
-     *
-     * Amount is evaluated using intval
-     *
-     * @return int
-     */
-    public function getInt()
-    {
-        return intval($this->amount);
-    }
-
-    /**
      * Set amount from floating point number
      *
      * Note that amount internally is stored as a string. Converting number to
-     * string may involve rounding and yield unexpected results. To keep
-     * precision use setString() instead.
+     * string may involve rounding and yield unexpected results.
      *
      * @param  float                  $float
      * @return Amount                 Instance for chaining
@@ -159,77 +238,6 @@ class Amount
         $this->amount = sprintf('%F', $float);
 
         return $this;
-    }
-
-    /**
-     * Get amount as float
-     *
-     * Note that amount internally is stored as a string. Converting to floating
-     * point number may lead to a loss of precision.
-     *
-     * @param  int   $precision Decimal precision. Defaults to loaded value.
-     * @return float
-     */
-    public function getFloat($precision = null)
-    {
-        return (float)round(floatval($this->amount), $this->getPrecision($precision));
-    }
-
-    /**
-     * Set amount from string
-     *
-     * @param  string                 $str
-     * @return Amount                 Instance for chaining
-     * @throws InvalidAmountException If $str is not a numerical string
-     */
-    public function setString($str)
-    {
-        if ($str === '') {
-            $str = '0';
-        }
-
-        if (!is_string($str) || !is_numeric($str)) {
-            throw new InvalidAmountException("Amount must be a numerical string");
-        }
-
-        $this->amount = $str;
-
-        return $this;
-    }
-
-    /**
-     * Get amount as a non-locale aware string
-     *
-     * The number of decimal digits returned is set using setPrecision()
-     *
-     * @param  int   $precision Decimal precision. Defaults to loaded value.
-     * @return string
-     */
-    public function getString($precision = null)
-    {
-        return bcadd($this->amount, '0.0', $this->getPrecision($precision));
-    }
-
-    /**
-     * Get amount as a non-locale aware string
-     *
-     * The number of decimal digits returned is set using setPrecision()
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->getString();
-    }
-
-    /**
-     * Get the raw string representation
-     *
-     * @return string
-     */
-    public function getRawString()
-    {
-        return $this->amount;
     }
 
     /**
@@ -262,7 +270,8 @@ class Amount
         $str = str_replace($point, '.', $str);
         $str = str_replace($sep, '', $str);
 
-        return $this->setString($str);
+        $this->amount = $str;
+        return $this;
     }
 
     /**
@@ -279,17 +288,6 @@ class Amount
     {
         assert('is_string($format)');
         return money_format($format, $this->getFloat());
-    }
-
-    /**
-     * Check if str is a valid signal string
-     *
-     * @param  string $str
-     * @return bool
-     */
-    public function isSignalString($str)
-    {
-        return !!preg_match("/^\d+(å|[JKLMNOPQR])?$/", $str);
     }
 
     /**
@@ -316,7 +314,7 @@ class Amount
      */
     public function setSignalString($str)
     {
-        if (!$this->isSignalString($str)) {
+        if (!preg_match("/^\d+(å|[JKLMNOPQR])?$/", $str)) {
             throw new InvalidAmountException("Amount must be a valid singal string");
         }
 
@@ -330,118 +328,95 @@ class Amount
         }
         $str = preg_replace("/^(-?\d*)(\d\d)$/", "$1.$2", $str, 1);
 
-        return $this->setString($str);
+        $this->amount = $str;
+        return $this;
     }
 
     /**
-     * Get amount as signal string
-     *
-     * Signal strings does not contain a decimal digit separator. Instead the
-     * last two digits are always considered decimals. For negative values the
-     * last digit is converted to an alphabetic character. See setSignalString()
-     * for a futher description.
-     *
-     * @return string
-     */
-    public function getSignalString()
-    {
-        $arAmount = str_split($this->getString(2));
-
-        // Convert negative values
-        if ($arAmount[0] == '-') {
-            // Shift off sign
-            array_shift($arAmount);
-            // Set singal character
-            $last = count($arAmount) -1;
-            $arAmount[$last] = self::$signals[$arAmount[$last]];
-        }
-
-        // Remove decimal digit separator
-        return str_replace('.', '', implode('', $arAmount));
-    }
-
-    /**
-     * Add to amount
+     * Get new Amount with the value of $amount added to instance
      *
      * @param  Amount $amount
-     * @return Amount Instance for chaining
+     * @return Amount
      */
     public function add(Amount $amount)
     {
-        $this->amount = bcadd(
-            $this->amount,
-            $amount->getRawString(),
+        return new static(
+            bcadd(
+                $this->getAmount(),
+                $amount->getAmount(),
+                $this->getPrecision()
+            ),
             $this->getPrecision()
         );
-
-        return $this;
     }
 
     /**
-     * Subtract from amount
+     * Get new Amount with the value of $amount subtracted from instance
      *
      * @param  Amount $amount
-     * @return Amount Instance for chaining
+     * @return Amount
      */
     public function subtract(Amount $amount)
     {
-        $this->amount = bcsub(
-            $this->amount,
-            $amount->getRawString(),
+        return new static(
+            bcsub(
+                $this->getAmount(),
+                $amount->getAmount(),
+                $this->getPrecision()
+            ),
             $this->getPrecision()
         );
-
-        return $this;
     }
 
     /**
-     * Multiply amount with other amount
+     * Get new Amount with the value of instance multiplied with $amount
      *
      * @param  Amount $amount
-     * @return Amount Instance for chaining
+     * @return Amount
      */
     public function multiplyWith(Amount $amount)
     {
-        $this->amount = bcmul(
-            $this->amount,
-            $amount->getRawString(),
+        return new static(
+            bcmul(
+                $this->getAmount(),
+                $amount->getAmount(),
+                $this->getPrecision()
+            ),
             $this->getPrecision()
         );
-
-        return $this;
     }
 
     /**
-     * Divide amount by other amount
+     * Get new Amount with the value of instance divided by $amount
      *
      * @param  Amount $amount
-     * @return Amount Instance for chaining
+     * @return Amount
      */
     public function divideBy(Amount $amount)
     {
-        $this->amount = bcdiv(
-            $this->amount,
-            $amount->getRawString(),
+        return new static(
+            bcdiv(
+                $this->getAmount(),
+                $amount->getAmount(),
+                $this->getPrecision()
+            ),
             $this->getPrecision()
         );
-
-        return $this;
     }
 
     /**
-     * Swap sign of amount
+     * Compare to amount
      *
-     * @return Amount Instance for chaining
+     * @param  Amount $amount
+     * @return int 0 if instance and $amount are equal, 1 if instance is larger, -1 otherwise.
      */
-    public function invert()
+    public function compareTo(Amount $amount)
     {
-        $this->amount = bcmul(
-            $this->amount,
-            '-1',
+        return bccomp(
+            $this->getAmount(),
+            $amount->getAmount(),
             $this->getPrecision()
         );
-
-        return $this;
     }
 
     /**
@@ -452,26 +427,29 @@ class Amount
      */
     public function equals(Amount $amount)
     {
-        return 0 === bccomp(
-            $this->amount,
-            $amount->getRawString(),
-            $this->getPrecision()
-        );
+        return 0 == $this->compareTo($amount);
     }
 
     /**
-     * Check if instance is lesser than amount
+     * Check if instance is less than amount
      *
      * @param  Amount $amount
      * @return bool
      */
-    public function isLesserThan(Amount $amount)
+    public function isLessThan(Amount $amount)
     {
-        return -1 === bccomp(
-            $this->amount,
-            $amount->getRawString(),
-            $this->getPrecision()
-        );
+        return -1 == $this->compareTo($amount);
+    }
+
+    /**
+     * Check if instance is less than or equals amount
+     *
+     * @param  Amount $amount
+     * @return bool
+     */
+    public function isLessThanOrEquals(Amount $amount)
+    {
+        return $this->isLessThan($amount) || $this->equals($amount);
     }
 
     /**
@@ -482,20 +460,67 @@ class Amount
      */
     public function isGreaterThan(Amount $amount)
     {
-        return 1 === bccomp(
-            $this->amount,
-            $amount->getRawString(),
-            $this->getPrecision()
-        );
+        return 1 == $this->compareTo($amount);
     }
 
     /**
-     * Check if amount is non-cero
+     * Check if instance is greater than or equals amount
+     *
+     * @param  Amount $amount
+     * @return bool
+     */
+    public function isGreaterThanOrEquals(Amount $amount)
+    {
+        return $this->isGreaterThan($amount) || $this->equals($amount);
+    }
+
+    /**
+     * Check if amount is zero
      *
      * @return bool
      */
-    public function hasValue()
+    public function isZero()
     {
-        return !$this->equals(new Amount('0'));
+        return $this->equals(new Amount('0'));
+    }
+
+    /**
+     * Check if amount is greater than zero
+     *
+     * @return bool
+     */
+    public function isPositive()
+    {
+        return $this->isGreaterThan(new Amount('0'));
+    }
+
+    /**
+     * Check if amount is less than zero
+     *
+     * @return bool
+     */
+    public function isNegative()
+    {
+        return $this->isLessThan(new Amount('0'));
+    }
+
+    /**
+     * Get new amount with sign inverted
+     *
+     * @return Amount
+     */
+    public function getInverted()
+    {
+        return $this->multiplyWith(new Amount('-1'));
+    }
+
+    /**
+     * Get new amount with negative sign removed
+     *
+     * @return Amount
+     */
+    public function getAbsolute()
+    {
+        return $this->isNegative() ? $this->getInverted() : clone $this;
     }
 }

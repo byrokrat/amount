@@ -15,37 +15,46 @@ Api
 
  * `__construct([string $amount [, int $precision]]) : Amount` creates a new
     instance.
+ * `getAmount() : string` gets the raw stored amount.
+ * `getString([int $precision]) : string` gets amount as a non-locale aware
+    string.
+ * `__toString() : string` gets amount as non-locale aware string.
+ * `getInt() : int` gets amount as integer (WARNING: loss of precision).
+ * `getFloat([int $precision]) : float` gets amount as float (WARNING: loss of
+    precision).
+ * `getSignalString() : string` gets amount as a signal string.
  * `setPrecision(int $precision) : Amount` sets the number of digits used in
     calculations and output.
  * `getPrecision() : int` gets the number of digits used in calculations and
     output.
  * `setInt(int $int) : Amount` loads amount from integer (WARNING: loss of
     precision).
- * `getInt() : int` gets amount as integer (WARNING: loss of precision).
  * `setFloat(float $float) : Amount` loads amount from float (WARNING: loss of
     precision).
- * `getFloat([int $precision]) : float` gets amount as float (WARNING: loss of
-    precision).
- * `setString(string $str) : Amount` loads amount from string.
- * `getString([int $precision]) : string` gets amount as a non-locale aware
-    string.
- * `__toString() : string` gets amount as non-locale aware string.
- * `getRawString() : string` gets the raw string representation.
  * `setLocaleString(string $str [, string $point [, string $sep]]) : Amount`
    loads amount from locale formatted string.
  * `format([string $format]) : string` gets locale aware format.
- * `isSignalString(string $str) : bool` check if $str is a valid signal string.
  * `setSignalString(string $str) : Amount` loads amount from signal string.
- * `getSignalString() : string` gets amount as signal string.
- * `add(Amount $amount) : Amount` add to amount.
- * `subtract(Amount $amount) : Amount` subtract from amount.
- * `multiplyWith(Amount $amount) : Amount` multiply with amount.
- * `divideBy(Amount $amount) : Amount` divide by amount.
- * `invert() : Amount` swap sign of amount.
- * `equals(Amount $amount) : bool` check if instance equals amount.
- * `isLesserThan(Amount $amount) : bool` check if instance is lesser than amount.
- * `isGreaterThan(Amount $amount) : bool` check if instance is greater than amount.
- * `hasValue() : bool` check if amount is non-cero.
+ * `add(Amount $amount) : Amount` gets a new Amount with the value of $amount
+   added to instance.
+ * `subtract(Amount $amount) : Amount` gets a new Amount with the value of
+   $amount subtracted from instance.
+ * `multiplyWith(Amount $amount) : Amount` gets a new Amount with the value of
+   instance multiplied with $amount.
+ * `divideBy(Amount $amount) : Amount` gets a new Amount with the value of
+   instance divided by $amount.
+ * `compareTo(Amount $amount) : int` returns 0 if instance and $amount are equal,
+   1 if instance is larger, -1 otherwise.
+ * `equals(Amount $amount) : bool` checks if instance equals amount.
+ * `isLessThan(Amount $amount) : bool` checks if instance is less than amount.
+ * `isLessThanOrEquals(Amount $amount) : bool` checks if instance is less than or equals amount.
+ * `isGreaterThan(Amount $amount) : bool` checks if instance is greater than amount.
+ * `isGreaterThanOrEquals(Amount $amount) : bool` checks if instance is greater than or equals amount.
+ * `isZero() : bool` checks if amount is zero.
+ * `isPositive() : bool` checks if amount is greater than zero.
+ * `isNegative() : bool` checks if amount is less than zero.
+ * `getInverted() : Amount` gets new amount with sign inverted.
+ * `getAbsolute() : Amount` gets new amount with negative sign removed.
 
 Usage
 -----
