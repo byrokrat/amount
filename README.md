@@ -19,35 +19,35 @@ Api
 ---
 [`Amount`](/src/Amount.php) defines the following api:
 
- * `**__construct**([string $amount]) : Amount` create new instance.
- * `**createFromNumber**(int|float $number) : Amount` create from integer or floating
+ * __`__construct([string $amount]) : Amount`__ create new instance.
+ * __`createFromNumber(int|float $number) : Amount`__ create from integer or floating
    point number.
- * `**createFromLocaleString**(string $str [, string $point [, string $sep]]) : Amount`
+ * __`createFromLocaleString(string $str [, string $point [, string $sep]]) : Amount`
    create from a localized formatted string.
- * `**createFromSignalString**(string $str) : Amount` create from signal string.
- * `**getAmount**() : string` get the raw stored amount.
- * `**getString**([int $precision]) : string` get amount as string.
- * `**__tostring**() : string` get amount as string.
- * `**format**([string $format]) : string` get locale aware format.
- * `**getInt**() : int` get amount as integer (WARNING: loss of precision).
- * `**getFloat**([int $precision]) : float` get amount as float (WARNING: loss of
+ * __`createFromSignalString(string $str) : Amount`__ create from signal string.
+ * __`getAmount() : string`__ get the raw stored amount.
+ * __`getString([int $precision]) : string`__ get amount as string.
+ * __`__tostring() : string`__ get amount as string.
+ * __`format([string $format]) : string`__ get locale aware format.
+ * __`getInt() : int`__ get amount as integer (WARNING: loss of precision).
+ * __`getFloat([int $precision]) : float`__ get amount as float (WARNING: loss of
     precision).
- * `**getSignalString**() : string` get amount as a signal string.
- * `**add**(Amount $amount) : Amount` get new Amount with the value of $amount added.
- * `**subtract**(Amount $amount) : Amount` get new Amount with the value of $amount subtracted.
- * `**multiplyWith**(Amount $amount) : Amount` get new Amount with value multiplied with $amount.
- * `**divideBy**(Amount $amount) : Amount` get new Amount with value divided by $amount.
- * `**compareTo**(Amount $amount) : int` 0 if equals $amount, 1 if greater than amount, -1 otherwise.
- * `**equals**(Amount $amount) : bool` check if equals amount.
- * `**isLessThan**(Amount $amount) : bool` check if less than amount.
- * `**isLessThanOrEquals**(Amount $amount) : bool` check if less than or equals amount.
- * `**isGreaterThan**(Amount $amount) : bool` check if greater than amount.
- * `**isGreaterThanOrEquals**(Amount $amount) : bool` check if greater than or equals amount.
- * `**isZero**() : bool` check if amount is zero.
- * `**isPositive**() : bool` check if amount is greater than zero.
- * `**isNegative**() : bool` check if amount is less than zero.
- * `**getInverted**() : Amount` get new amount with sign inverted.
- * `**getAbsolute**() : Amount` get new amount with negative sign removed.
+ * __`getSignalString() : string`__ get amount as a signal string.
+ * __`add(Amount $amount) : Amount`__ get new Amount with the value of $amount added.
+ * __`subtract(Amount $amount) : Amount`__ get new Amount with the value of $amount subtracted.
+ * __`multiplyWith(Amount $amount) : Amount`__ get new Amount with value multiplied with $amount.
+ * __`divideBy(Amount $amount) : Amount`__ get new Amount with value divided by $amount.
+ * __`compareTo(Amount $amount) : int`__ 0 if equals $amount, 1 if greater than amount, -1 otherwise.
+ * __`equals(Amount $amount) : bool`__ check if equals amount.
+ * __`isLessThan(Amount $amount) : bool`__ check if less than amount.
+ * __`isLessThanOrEquals(Amount $amount) : bool`__ check if less than or equals amount.
+ * __`isGreaterThan(Amount $amount) : bool`__ check if greater than amount.
+ * __`isGreaterThanOrEquals(Amount $amount) : bool`__ check if greater than or equals amount.
+ * __`isZero() : bool`__ check if amount is zero.
+ * __`isPositive() : bool`__ check if amount is greater than zero.
+ * __`isNegative() : bool`__ check if amount is less than zero.
+ * __`getInverted() : Amount`__ get new amount with sign inverted.
+ * __`getAbsolute() : Amount`__ get new amount with negative sign removed.
 
 Usage
 -----
