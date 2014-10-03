@@ -6,8 +6,14 @@
 
 Handle monetary amounts using bcmath for arithmetic precision.
 
-> Install using [composer](http://getcomposer.org/). Exists as **ledgr/amount** in
-> the packagist repository.
+> Install using [composer](http://getcomposer.org/). Exists as **ledgr/amount**
+> in the packagist repository.
+
+Features
+--------
+ * Immutable value object.
+ * Using the [bcmath](http://php.net/manual/en/book.bc.php) extension for
+   arbitrary floating point arithmetic precision.
 
 Api
 ---
@@ -15,6 +21,12 @@ Api
 
  * `__construct([string $amount [, int $precision]]) : Amount` creates a new
     instance.
+ * `createFromNumber(int|float $number [, int $precision]) : Amount` creates
+   amount from integer or floating point number (warning: loss of precision).
+ * `createFromLocaleString(string $str  [, int $precision [, string $point [, string $sep]]]) : Amount`
+   creates amount from a localized formatted string.
+ * `createFromSignalString(string $str [, int $precision]) : Amount` creates
+   amount from signal string.
  * `getAmount() : string` gets the raw stored amount.
  * `getString([int $precision]) : string` gets amount as a non-locale aware
     string.
@@ -23,18 +35,9 @@ Api
  * `getFloat([int $precision]) : float` gets amount as float (WARNING: loss of
     precision).
  * `getSignalString() : string` gets amount as a signal string.
- * `setPrecision(int $precision) : Amount` sets the number of digits used in
-    calculations and output.
  * `getPrecision() : int` gets the number of digits used in calculations and
     output.
- * `setInt(int $int) : Amount` loads amount from integer (WARNING: loss of
-    precision).
- * `setFloat(float $float) : Amount` loads amount from float (WARNING: loss of
-    precision).
- * `setLocaleString(string $str [, string $point [, string $sep]]) : Amount`
-   loads amount from locale formatted string.
  * `format([string $format]) : string` gets locale aware format.
- * `setSignalString(string $str) : Amount` loads amount from signal string.
  * `add(Amount $amount) : Amount` gets a new Amount with the value of $amount
    added to instance.
  * `subtract(Amount $amount) : Amount` gets a new Amount with the value of

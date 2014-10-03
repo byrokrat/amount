@@ -47,9 +47,6 @@ class Amount
     /**
      * Constructor
      *
-     * Note that setting amount from floating point number or integer may lead
-     * to a loss of precision. See setInt() and setFloat() respectively.
-     *
      * @param string $amount
      * @param int    $precision The number of decimal digits used in calculations
      */
@@ -62,8 +59,95 @@ class Amount
         $this->amount = $amount;
 
         if (is_int($precision)) {
-            $this->setPrecision($precision);
+            $this->precision = abs($precision);
         }
+    }
+
+    /**
+     * Create amount from integer or floating point number
+     *
+     * Note that amount internally is stored as a string. Converting number to
+     * string may involve rounding and lead to a loss of precision.
+     *
+     * @param  int|float $number
+     * @param  int       $precision The number of decimal digits used in calculations
+     * @return Amount
+     * @throws InvalidAmountException If $int is not an integer
+     */
+    public static function createFromNumber($number, $precision = null)
+    {
+        if (!is_int($number) && !is_float($number)) {
+            throw new InvalidAmountException(
+                "createFromNumber() expects an integer or a floating point number"
+            );
+        }
+        return new static(sprintf('%F', $number), $precision);
+    }
+
+    /**
+     * Create amount from a localized formatted string
+     *
+     * @param  string $str
+     * @param  int    $precision The number of decimal digits used in calculations
+     * @param  string $point Decimal point character. Replaced with '.' If
+     *     omitted omitted the 'mon_decimal_point' value of the current monetary
+     *     locale is used.
+     * @param  string $sep   Group separator. Replaced with the empty string. If
+     *     omitted omitted the 'mon_thousands_sep' value of the current monetary
+     *     locale is used.
+     * @return Amount
+     */
+    public static function createFromLocaleString($str, $precision = null, $point = null, $sep = null)
+    {
+        assert('is_string($str)');
+
+        if (is_null($sep)) {
+            $locale = localeconv();
+            $sep = $locale['mon_thousands_sep'];
+            if (is_null($point)) {
+                $point = $locale['mon_decimal_point'];
+            }
+        }
+
+        assert('is_string($point)');
+        assert('is_string($sep)');
+
+        $str = str_replace($point, '.', $str);
+        $str = str_replace($sep, '', $str);
+
+        return new static($str, $precision);
+    }
+
+    /**
+     * Create amount from signal string
+     *
+     * Signal strings does not contain a decimal digit separator. Instead the
+     * last two digits are always considered decimals. For negative values the
+     * last digit is converted to an alphabetic character according to schema:
+     *  0 => å, 1 => J, 2 => K, ... 9 => R.
+     * 
+     * @param  string $str
+     * @param  int    $precision The number of decimal digits used in calculations
+     * @return Amount
+     * @throws InvalidAmountException If amount is not a valid signal string
+     */
+    public static function createFromSignalString($str, $precision = null)
+    {
+        if (!preg_match("/^\d+(å|[JKLMNOPQR])?$/", $str)) {
+            throw new InvalidAmountException("Amount must be a valid singal string");
+        }
+
+        if (!is_numeric($str)) {
+            $str = str_replace(
+                self::$signals,
+                array_keys(self::$signals),
+                $str
+            );
+            $str = "-$str";
+        }
+        $str = preg_replace("/^(-?\d*)(\d\d)$/", "$1.$2", $str, 1);
+
+        return new static($str, $precision);
     }
 
     /**
@@ -79,10 +163,7 @@ class Amount
     /**
      * Get amount as a non-locale aware string
      *
-     * The number of decimal digits returned is set using setPrecision() or the
-     * $precision parameter.
-     *
-     * @param  int $precision Decimal precision, defaults to loaded value
+     * @param  int $precision The number of decimal digits returned, defaults to loaded value
      * @return string
      */
     public function getString($precision = null)
@@ -92,8 +173,6 @@ class Amount
 
     /**
      * Get amount as a non-locale aware string
-     *
-     * The number of decimal digits returned is set using setPrecision().
      *
      * @return string
      */
@@ -133,8 +212,8 @@ class Amount
      *
      * Signal strings does not contain a decimal digit separator. Instead the
      * last two digits are always considered decimals. For negative values the
-     * last digit is converted to an alphabetic character. See setSignalString()
-     * for a futher description.
+     * last digit is converted to an alphabetic character. See
+     * createFromSignalString() for more information.
      *
      * @return string
      */
@@ -156,25 +235,10 @@ class Amount
     }
 
     /**
-     * Set the number of decimal digits used in calculations and output
-     *
-     * @param  int    $precision
-     * @return Amount Instance for chaining
-     */
-    public function setPrecision($precision)
-    {
-        assert('is_int($precision)');
-        $this->precision = abs($precision);
-
-        return $this;
-    }
-
-    /**
      * Get the number of decimal digits used in calculations and output
      *
-     * Can be set using at construct or using setPrecision(). If no precision is
-     * specified the 'frac_digits' value of the current monetary locale is used
-     * (see localeconv() in the PHP documentation).
+     * If no precision is specified the 'frac_digits' value of the current
+     * monetary locale is used (see localeconv() in the PHP documentation).
      *
      * If the monetary locale is 'C' a precision of 2 is used.
      *
@@ -201,80 +265,6 @@ class Amount
     }
 
     /**
-     * Set amount from integer
-     *
-     * Note that amount internally is stored as a string. Converting number to
-     * string may involve rounding and yield unexpected results.
-     *
-     * @param  int                    $int
-     * @return Amount                 Instance for chaining
-     * @throws InvalidAmountException If $int is not an integer
-     */
-    public function setInt($int)
-    {
-        if (!is_int($int)) {
-            throw new InvalidAmountException("Amount must be an integer");
-        }
-        $this->amount = sprintf('%F', $int);
-
-        return $this;
-    }
-
-    /**
-     * Set amount from floating point number
-     *
-     * Note that amount internally is stored as a string. Converting number to
-     * string may involve rounding and yield unexpected results.
-     *
-     * @param  float                  $float
-     * @return Amount                 Instance for chaining
-     * @throws InvalidAmountException If $float is not a floating point number
-     */
-    public function setFloat($float)
-    {
-        if (!is_float($float)) {
-            throw new InvalidAmountException("Amount must be a floating point number");
-        }
-        $this->amount = sprintf('%F', $float);
-
-        return $this;
-    }
-
-    /**
-     * Set a locale formatted string
-     *
-     * @param  string $str
-     * @param  string $point Decimal point character. Replaced with '.' If
-     *     omitted omitted the 'mon_decimal_point' value of the current monetary
-     *     locale is used.
-     * @param  string $sep   Group separator. Replaced with the empty string. If
-     *     omitted omitted the 'mon_thousands_sep' value of the current monetary
-     *     locale is used.
-     * @return Amount        Instance for chaining
-     */
-    public function setLocaleString($str, $point = null, $sep = null)
-    {
-        assert('is_string($str)');
-
-        if (is_null($sep)) {
-            $locale = localeconv();
-            $sep = $locale['mon_thousands_sep'];
-            if (is_null($point)) {
-                $point = $locale['mon_decimal_point'];
-            }
-        }
-
-        assert('is_string($point)');
-        assert('is_string($sep)');
-
-        $str = str_replace($point, '.', $str);
-        $str = str_replace($sep, '', $str);
-
-        $this->amount = $str;
-        return $this;
-    }
-
-    /**
      * Locale aware format amount
      *
      * Note that amount is converted to a floating point number before
@@ -288,48 +278,6 @@ class Amount
     {
         assert('is_string($format)');
         return money_format($format, $this->getFloat());
-    }
-
-    /**
-     * Set amount from signal string
-     *
-     * Signal strings does not contain a decimal digit separator. Instead the
-     * last two digits are always considered decimals. For negative values the
-     * last digit is converted to an alphabetic character according to schema:
-     * 
-     * <code>å: letter is transformed to 0
-     * J: 1
-     * K: 2
-     * L: 3
-     * M: 4
-     * N: 5
-     * O: 6
-     * P: 7
-     * Q: 8
-     * R: 9</code>
-     *
-     * @param  string                 $str
-     * @return Amount                 Instance for chaining
-     * @throws InvalidAmountException If amount is not a valid signal string
-     */
-    public function setSignalString($str)
-    {
-        if (!preg_match("/^\d+(å|[JKLMNOPQR])?$/", $str)) {
-            throw new InvalidAmountException("Amount must be a valid singal string");
-        }
-
-        if (!is_numeric($str)) {
-            $str = str_replace(
-                self::$signals,
-                array_keys(self::$signals),
-                $str
-            );
-            $str = "-$str";
-        }
-        $str = preg_replace("/^(-?\d*)(\d\d)$/", "$1.$2", $str, 1);
-
-        $this->amount = $str;
-        return $this;
     }
 
     /**

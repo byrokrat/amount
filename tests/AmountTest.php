@@ -3,35 +3,6 @@ namespace ledgr\amount;
 
 class AmountTest extends \PHPUnit_Framework_TestCase
 {
-    public function assertAmount(Amount $amount, $str, $int, $float, $signal)
-    {
-        $this->assertSame($str,    $amount->getString(),       'getString');
-        $this->assertSame($str,    (string)$amount,            '__tostring');
-        $this->assertSame($int,    $amount->getInt(),          'getInt');
-        $this->assertSame($float,  $amount->getFloat(),        'getFloat');
-        $this->assertSame($signal, $amount->getSignalString(), 'getSignalString');
-    }
-
-    /**
-     * @dataProvider amountProvider
-     */
-    public function testAmounts($precision, $str, $float, $signal, $int, $intSafe)
-    {
-        $amount = new Amount($str, $precision);
-        $this->assertAmount($amount, $str, $int, $float, $signal);
-
-        $amount->setFloat($float);
-        $this->assertAmount($amount, $str, $int, $float, $signal);
-
-        $amount->setSignalString($signal);
-        $this->assertAmount($amount, $str, $int, $float, $signal);
-
-        if ($intSafe) {
-            $amount->setInt($int);
-            $this->assertAmount($amount, $str, $int, $float, $signal);
-        }
-    }
-
     public function amountProvider()
     {
         return array(
@@ -58,25 +29,45 @@ class AmountTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function assertAmount(Amount $amount, $str, $int, $float, $signal)
+    {
+        $this->assertSame($str,    $amount->getString(),       'getString');
+        $this->assertSame($str,    (string)$amount,            '__tostring');
+        $this->assertSame($int,    $amount->getInt(),          'getInt');
+        $this->assertSame($float,  $amount->getFloat(),        'getFloat');
+        $this->assertSame($signal, $amount->getSignalString(), 'getSignalString');
+    }
+
+    /**
+     * @dataProvider amountProvider
+     */
+    public function testAmounts($precision, $str, $float, $signal, $int, $intSafe)
+    {
+        $this->assertAmount(new Amount($str, $precision), $str, $int, $float, $signal);
+        $this->assertAmount(Amount::createFromNumber($float, $precision), $str, $int, $float, $signal);
+        $this->assertAmount(Amount::createFromSignalString($signal, $precision), $str, $int, $float, $signal);
+        if ($intSafe) {
+            $this->assertAmount(Amount::createFromNumber($int, $precision), $str, $int, $float, $signal);
+        }
+    }
+
     public function testFloatRounding()
     {
-        $amount = new Amount('0', 2);
-
-        $amount->setFloat(123.0);
+        $amount = Amount::createFromNumber(123.0);
         $this->assertSame(123.00, $amount->getFloat());
 
-        $amount->setFloat(123.111);
+        $amount = Amount::createFromNumber(123.111);
         $this->assertSame(123.11, $amount->getFloat());
 
-        $amount->setFloat(123.119);
+        $amount = Amount::createFromNumber(123.119);
         $this->assertSame(123.12, $amount->getFloat());
         $this->assertSame(123.119, $amount->getFloat(3));
         $this->assertSame("123.11", $amount->getString());
 
-        $amount->setFloat(-123.111);
+        $amount = Amount::createFromNumber(-123.111);
         $this->assertSame(-123.11, $amount->getFloat());
 
-        $amount->setFloat(-123.119);
+        $amount = Amount::createFromNumber(-123.119);
         $this->assertSame(-123.12, $amount->getFloat());
         $this->assertSame("-123.11", $amount->getString());
     }
@@ -113,8 +104,7 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 
     public function testGetPrecision()
     {
-        $amount = new Amount();
-        $amount->setPrecision(10);
+        $amount = new Amount('0', 10);
         $this->assertSame(10, $amount->getPrecision());
 
         setlocale(LC_MONETARY, 'C');
@@ -130,66 +120,35 @@ class AmountTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('10000.50', $amount->format('%!^n'));
     }
 
-    public function testSetLocaleString()
+    public function testCreateFromLocaleString()
     {
-        $amount = new Amount('0', 2);
-        $amount->setLocaleString('10000.00');
-        $this->assertSame('10000.00', $amount->getAmount());
-        $amount->setLocaleString('-10 000,00', ',', ' ');
-        $this->assertSame('-10000.00', $amount->getAmount());
+        $this->assertSame(
+            '10000.00',
+            Amount::createFromLocaleString('10000.00', 2)->getAmount()
+        );
+        $this->assertSame(
+            '-10000.00',
+            Amount::createFromLocaleString('-10 000,00', 2, ',', ' ')->getAmount()
+        );
     }
 
-    /**
-     * @expectedException ledgr\amount\InvalidAmountException
-     */
-    public function testInvalidAmount()
-    {
-        new Amount(true);
-    }
-
-    /**
-     * @expectedException ledgr\amount\InvalidAmountException
-     */
-    public function testInvalidFloat()
-    {
-        $amount = new Amount();
-        $amount->setFloat(1);
-    }
-
-    /**
-     * @expectedException ledgr\amount\InvalidAmountException
-     */
-    public function testInvalidInt()
-    {
-        $amount = new Amount();
-        $amount->setInt(1.0);
-    }
-
-    /**
-     * @expectedException ledgr\amount\InvalidAmountException
-     */
     public function testInvalidString()
     {
-        $amount = new Amount('sdf');
+        $this->setExpectedException('ledgr\amount\InvalidAmountException');
+        new Amount('sdf');
     }
 
-    /**
-     * @expectedException ledgr\amount\InvalidAmountException
-     */
-    public function testInvalidSignal()
+    public function testInvalidNumber()
     {
-        $amount = new Amount();
-        $amount->setSignalString('Q123Q');
+        $this->setExpectedException('ledgr\amount\InvalidAmountException');
+        Amount::createFromNumber(true);
     }
 
-    /*public function testChaining()
+    public function testInvalidSignalString()
     {
-        $amount = new Amount('0');
-        $this->assertSame(
-            '10',
-            $amount->subtract(new Amount('10'))->getInverted()->setPrecision(0)->getString()
-        );
-    }*/
+        $this->setExpectedException('ledgr\amount\InvalidAmountException');
+        Amount::createFromSignalString('Q123Q');
+    }
 
     public function testAdd()
     {
