@@ -1,7 +1,7 @@
 {
     "name": "ledgr/amount",
     "description": "Handle monetary amounts using bcmath for arithmetic precision",
-    "keywords": ["monetary amount", "economics", "money"],
+    "keywords": ["monetary amount", "economics", "money", "currency"],
     "homepage": "https://github.com/ledgr/amount",
     "type": "library",
     "license": "WTFPL",
