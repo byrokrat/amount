@@ -1,6 +1,6 @@
 {
     "name": "ledgr/amount",
-    "description": "Handle monetary amounts using bcmath for arithmetic precision",
+    "description": "Value objects for monetary amounts",
     "keywords": ["monetary amount", "economics", "money", "currency"],
     "homepage": "https://github.com/ledgr/amount",
     "type": "library",

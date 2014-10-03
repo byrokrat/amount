@@ -24,11 +24,6 @@ class Amount
     private $amount;
 
     /**
-     * @var int The number of decimal digits to use
-     */
-    private $precision;
-
-    /**
      * @var array Substitution map for signal strings
      */
     private static $signals = array(
@@ -39,18 +34,13 @@ class Amount
      * Create amount from numerical string
      *
      * @param string $amount
-     * @param int    $precision The number of decimal digits used in calculations
      */
-    public function __construct($amount = '0', $precision = -1)
+    public function __construct($amount = '0')
     {
         if (!is_string($amount) || !is_numeric($amount)) {
             throw new InvalidAmountException("Amount must be a numerical string");
         }
-        if (!is_int($precision)) {
-            throw new InvalidAmountException("Precision must be an integer");
-        }
         $this->amount = $amount;
-        $this->precision = $precision >= 0 ? $precision : $this->getDefaultPrecision();
     }
 
     /**
@@ -60,25 +50,23 @@ class Amount
      * string may involve rounding and lead to a loss of precision.
      *
      * @param  int|float $number
-     * @param  int       $precision The number of decimal digits used in calculations
      * @return Amount
      * @throws InvalidAmountException If $int is not an integer
      */
-    public static function createFromNumber($number, $precision = -1)
+    public static function createFromNumber($number)
     {
         if (!is_int($number) && !is_float($number)) {
             throw new InvalidAmountException(
                 "createFromNumber() expects an integer or a floating point number"
             );
         }
-        return new static(sprintf('%F', $number), $precision);
+        return new static(sprintf('%F', $number));
     }
 
     /**
      * Create amount from a localized formatted string
      *
      * @param  string $strAmount
-     * @param  int    $precision The number of decimal digits used in calculations
      * @param  string $point Decimal point character. Replaced with '.' If
      *     omitted omitted the 'mon_decimal_point' value of the current monetary
      *     locale is used.
@@ -87,7 +75,7 @@ class Amount
      *     locale is used.
      * @return Amount
      */
-    public static function createFromLocaleString($strAmount, $precision = -1, $point = null, $sep = null)
+    public static function createFromLocaleString($strAmount, $point = null, $sep = null)
     {
         assert('is_string($strAmount)');
 
@@ -105,7 +93,7 @@ class Amount
         $strAmount = str_replace($point, '.', $strAmount);
         $strAmount = str_replace($sep, '', $strAmount);
 
-        return new static($strAmount, $precision);
+        return new static($strAmount);
     }
 
     /**
@@ -117,11 +105,10 @@ class Amount
      * 0 => å, 1 => J, 2 => K, ... 9 => R.
      * 
      * @param  string $strAmount
-     * @param  int    $precision The number of decimal digits used in calculations
      * @return Amount
      * @throws InvalidAmountException If amount is not a valid signal string
      */
-    public static function createFromSignalString($strAmount, $precision = -1)
+    public static function createFromSignalString($strAmount)
     {
         if (!preg_match("/^\d+(å|[JKLMNOPQR])?$/", $strAmount)) {
             throw new InvalidAmountException("Amount must be a valid singal string");
@@ -136,8 +123,7 @@ class Amount
         }
 
         return new static(
-            preg_replace("/^(-?\d*)(\d\d)$/", "$1.$2", $strAmount, 1),
-            $precision
+            preg_replace("/^(-?\d*)(\d\d)$/", "$1.$2", $strAmount, 1)
         );
     }
 
@@ -152,19 +138,9 @@ class Amount
     }
 
     /**
-     * Get the number of decimal digits used in calculations and output
-     *
-     * @return int
-     */
-    public function getPrecision()
-    {
-        return $this->precision;
-    }
-
-    /**
      * Get amount as string
      *
-     * @param  int $precision The number of decimal digits returned, defaults to loaded value
+     * @param  int $precision Optional decimal precision
      * @return string
      */
     public function getString($precision = -1)
@@ -172,8 +148,18 @@ class Amount
         return bcadd(
             $this->getAmount(),
             '0.0',
-            $precision >= 0 ? $precision : $this->getPrecision()
+            $precision >= 0 ? $precision : $this->getDefaultPrecision()
         );
+    }
+
+    /**
+     * Get amount as string
+     *
+     * @return string
+     */
+    public function __tostring()
+    {
+        return $this->getString();
     }
 
     /**
@@ -215,16 +201,6 @@ class Amount
     }
 
     /**
-     * Get amount as string
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->getString();
-    }
-
-    /**
      * Get amount as integer
      *
      * Amount is evaluated using intval
@@ -242,14 +218,14 @@ class Amount
      * Note that amount internally is stored as a string. Converting to floating
      * point number may lead to a loss of precision.
      *
-     * @param  int   $precision Decimal precision. Defaults to loaded value.
+     * @param  int   $precision Optional decimal precision
      * @return float
      */
     public function getFloat($precision = -1)
     {
         return (float)round(
             floatval($this->getAmount()),
-            $precision >= 0 ? $precision : $this->getPrecision()
+            $precision >= 0 ? $precision : $this->getDefaultPrecision()
         );
     }
 
@@ -265,9 +241,8 @@ class Amount
             bcadd(
                 $this->getAmount(),
                 $amount->getAmount(),
-                $this->getPrecision()
-            ),
-            $this->getPrecision()
+                $this->getInternalPrecision()
+            )
         );
     }
 
@@ -283,9 +258,8 @@ class Amount
             bcsub(
                 $this->getAmount(),
                 $amount->getAmount(),
-                $this->getPrecision()
-            ),
-            $this->getPrecision()
+                $this->getInternalPrecision()
+            )
         );
     }
 
@@ -301,9 +275,8 @@ class Amount
             bcmul(
                 $this->getAmount(),
                 $amount->getAmount(),
-                $this->getPrecision()
-            ),
-            $this->getPrecision()
+                $this->getInternalPrecision()
+            )
         );
     }
 
@@ -319,9 +292,8 @@ class Amount
             bcdiv(
                 $this->getAmount(),
                 $amount->getAmount(),
-                $this->getPrecision()
-            ),
-            $this->getPrecision()
+                $this->getInternalPrecision()
+            )
         );
     }
 
@@ -336,7 +308,7 @@ class Amount
         return bccomp(
             $this->getAmount(),
             $amount->getAmount(),
-            $this->getPrecision()
+            $this->getInternalPrecision()
         );
     }
 
@@ -446,12 +418,22 @@ class Amount
     }
 
     /**
-     * Get the default precision for this currency
+     * Get the default display precision for this currency
      *
      * @return int
      */
     protected function getDefaultPrecision()
     {
         return 2;
+    }
+
+    /**
+     * Get the internal precision used in computations
+     *
+     * @return int
+     */
+    protected function getInternalPrecision()
+    {
+        return 10;
     }
 }
