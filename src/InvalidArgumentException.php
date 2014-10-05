@@ -10,10 +10,10 @@
 namespace ledgr\amount;
 
 /**
- * Exception thrown when amount is invalid
+ * Exception thrown if an argument is not of the expected type or form
  *
  * @author Hannes Forsgård <hannes.forsgard@fripost.org>
  */
-class InvalidAmountException extends \InvalidArgumentException implements Exception
+class InvalidArgumentException extends \InvalidArgumentException implements Exception
 {
 }

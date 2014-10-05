@@ -4,133 +4,80 @@ namespace ledgr\amount;
 
 class AmountTest extends \PHPUnit_Framework_TestCase
 {
-    public function amountFormatProvider()
+    public function invalidStringsProvider()
     {
         return array(
-            array(0, '100',     '100.00', 100.,    '10000', 100, true),
-            array(1, '100.0',   '100.00', 100.0,   '10000', 100, true),
-            array(2, '100.00',  '100.00', 100.00,  '10000', 100, true),
-            array(3, '100.000', '100.00', 100.000, '10000', 100, true),
-
-            array(2, '123.23', '123.23', 123.23, '12323', 123, false),
-            array(2, '123.99', '123.99', 123.99, '12399', 123, false),
-
-            array(2, '0.23', '0.23', 0.23, '023', 0, false),
-
-            array(2, '-123.20', '-123.20', -123.20, '1232å', -123, false),
-            array(2, '-123.21', '-123.21', -123.21, '1232J', -123, false),
-            array(2, '-123.22', '-123.22', -123.22, '1232K', -123, false),
-            array(2, '-123.23', '-123.23', -123.23, '1232L', -123, false),
-            array(2, '-123.24', '-123.24', -123.24, '1232M', -123, false),
-            array(2, '-123.25', '-123.25', -123.25, '1232N', -123, false),
-            array(2, '-123.26', '-123.26', -123.26, '1232O', -123, false),
-            array(2, '-123.27', '-123.27', -123.27, '1232P', -123, false),
-            array(2, '-123.28', '-123.28', -123.28, '1232Q', -123, false),
-            array(2, '-123.29', '-123.29', -123.29, '1232R', -123, false),
+            array(123),               // not a string
+            array('alpha'),           // not numerical
+            array((string)0.0000001), // converts to something like 1.0E-7
         );
-    }
-
-    public function assertAmountOutput(Amount $amount, $precision, $str, $toStr, $int, $float, $signal)
-    {
-        $this->assertSame($str, $amount->getString($precision), 'getString');
-        $this->assertSame($toStr, (string)$amount, '__tostring');
-        $this->assertSame($int, $amount->getInt(), 'getInt');
-        $this->assertSame($float, $amount->getFloat($precision), 'getFloat');
-        $this->assertSame($signal, $amount->getSignalString(), 'getSignalString');
     }
 
     /**
-     * @dataProvider amountFormatProvider
+     * @dataProvider invalidStringsProvider
      */
-    public function testAmountFormats($precision, $str, $toStr, $float, $signal, $int, $intSafe)
+    public function testInvalidStrings($argument)
     {
-        $this->assertAmountOutput(new Amount($str), $precision, $str, $toStr, $int, $float, $signal);
-        $this->assertAmountOutput(Amount::createFromNumber($float), $precision, $str, $toStr, $int, $float, $signal);
-        $this->assertAmountOutput(Amount::createFromSignalString($signal), $precision, $str, $toStr, $int, $float, $signal);
-        if ($intSafe) {
-            $this->assertAmountOutput(Amount::createFromNumber($int), $precision, $str, $toStr, $int, $float, $signal);
-        }
+        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        new Amount($argument);
     }
 
-    public function testInvalidAmountException()
+    public function validStringsProvider()
     {
-        $this->setExpectedException('ledgr\amount\InvalidAmountException');
-        new Amount('sdf');
-    }
-
-    public function testCreateFromNumberException()
-    {
-        $this->setExpectedException('ledgr\amount\InvalidAmountException');
-        Amount::createFromNumber(true);
-    }
-
-    public function testCreateFromSignalStringException()
-    {
-        $this->setExpectedException('ledgr\amount\InvalidAmountException');
-        Amount::createFromSignalString('Q123Q');
-    }
-
-    public function testCreateFromLocaleString()
-    {
-        $this->assertSame(
-            '10000.00',
-            Amount::createFromLocaleString('10000.00')->getString(2)
-        );
-        $this->assertSame(
-            '-10000.00',
-            Amount::createFromLocaleString('-10 000,00', ',', ' ')->getString(2)
+        return array(
+            array('999', '999.00'),
+            array('1.1', '1.10'),
+            array('-123', '-123.00'),
+            array('.01', '0.01'),
         );
     }
 
-    public function testFormat()
+    /**
+     * @dataProvider validStringsProvider
+     */
+    public function testCreatingFromString($string, $expected)
     {
-        $amount = new Amount('10000.5');
+        $amount = new Amount($string);
         $this->assertSame(
-            '10000.50',
-            $amount->format('%!^n')
+            $expected,
+            $amount->getString(2)
         );
     }
 
     public function testRounding()
     {
-        $amount = Amount::createFromNumber(123.0);
-        $this->assertSame(123.00, $amount->getFloat(2));
-
-        $amount = Amount::createFromNumber(123.111);
-        $this->assertSame(123.11, $amount->getFloat(2));
-
-        $amount = Amount::createFromNumber(123.119);
-        $this->assertSame(123.12, $amount->getFloat(2));
-        $this->assertSame(123.119, $amount->getFloat(3));
-        $this->assertSame("123.11", $amount->getString(2));
-
-        $amount = Amount::createFromNumber(-123.111);
-        $this->assertSame(-123.11, $amount->getFloat(2));
-
-        $amount = Amount::createFromNumber(-123.119);
-        $this->assertSame(-123.12, $amount->getFloat(2));
-        $this->assertSame("-123.11", $amount->getString(2));
-
         $amount = new Amount('123.0');
         $this->assertSame("123.00", $amount->getString(2));
+        $this->assertSame(123.00, $amount->getFloat(2));
+        $this->assertSame(123, $amount->getInt());
 
         $amount = new Amount('123.111');
         $this->assertSame("123.11", $amount->getString(2));
+        $this->assertSame(123.11, $amount->getFloat(2));
+        $this->assertSame(123, $amount->getInt());
 
         $amount = new Amount('123.119');
-        $this->assertSame(123.12, $amount->getFloat(2));
         $this->assertSame("123.11", $amount->getString(2));
         $this->assertSame("123.119", $amount->getString(3));
+        $this->assertSame(123.12, $amount->getFloat(2));
+        $this->assertSame(123.119, $amount->getFloat(3));
+        $this->assertSame(123, $amount->getInt());
+
+        $amount = new Amount('-123.119');
+        $this->assertSame("-123.11", $amount->getString(2));
+        $this->assertSame(-123.12, $amount->getFloat(2));
+        $this->assertSame(-123, $amount->getInt());
 
         $amount = new Amount('-123.141');
         $this->assertSame("-123.14", $amount->getString(2));
 
         $amount = new Amount('-123.149');
-        $this->assertSame(-123.15, $amount->getFloat(2));
         $this->assertSame("-123.14", $amount->getString(2));
+        $this->assertSame(-123.15, $amount->getFloat(2));
+        $this->assertSame(-123, $amount->getInt());
 
         $amount1 = new Amount('1');
-        $amount = $amount1->divideBy(new Amount('7'));
+        $amount = $amount1->divideBy(7);
         $this->assertSame('0.1428571428', $amount->getAmount());
         $this->assertSame('0.14', $amount->getString(2));
     }
@@ -211,5 +158,117 @@ class AmountTest extends \PHPUnit_Framework_TestCase
         $this->assertNotSame($absoluteIinvertedTen, $invertedTen);
         $this->assertTrue($absoluteIinvertedTen->isPositive());
         $this->assertFalse($absoluteIinvertedTen->isNegative());
+    }
+
+    public function testBigIntegerSupport()
+    {
+        $this->assertSame(
+            PHP_INT_MAX/2,
+            Amount::createFromNumber(PHP_INT_MAX)->multiplyWith(2)->divideBy(4)->getFloat()
+        );
+    }
+
+    public function numberProvider()
+    {
+        return array(
+            array(100, '100.0000000000'),
+            array(100.0, '100.0000000000'),
+            array(100.00, '100.0000000000'),
+            array(100.000, '100.0000000000'),
+            array(123.23, '123.2300000000'),
+            array(-123.99, '-123.9900000000'),
+            array(0.23, '0.2300000000'),
+            array(0.0000001, '0.0000001000'),
+            array(1000000.0000001, '1000000.0000001000'),
+            array(-1000000.0000001, '-1000000.0000001000'),
+            array(999, '999.0000000000'),
+            array(1.0E+22, '10000000000000000000000.0000000000'),
+            array(1.000001E-4, '0.0001000001')
+        );
+    }
+
+    /**
+     * @dataProvider numberProvider
+     */
+    public function testCreateFromNumber($number, $expected)
+    {
+        $this->assertSame(
+            $expected,
+            Amount::createFromNumber($number)->getString(10)
+        );
+    }
+
+    public function testInvalidNumber()
+    {
+        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        Amount::createFromNumber('string');
+    }
+
+    public function formattedAmountsProvider()
+    {
+        return array(
+            array('-10 000,00', ',', ' ', '-10000.00'),
+            array('1 234 567:89', ':', ' ', '1234567.89'),
+            array('1,234,567.89', '.', ',', '1234567.89'),
+            array('1.234.567,89', ',', '.', '1234567.89')
+        );
+    }
+
+    /**
+     * @dataProvider formattedAmountsProvider
+     */
+    public function testCreateFromFormat($formatted, $point, $sep, $expected)
+    {
+        $this->assertSame(
+            $expected,
+            Amount::createFromFormat($formatted, $point, $sep)->getString(2)
+        );
+    }
+
+    public function signalStringsProvider()
+    {
+        return array(
+            array('1230å', '-123.00'),
+            array('1230J', '-123.01'),
+            array('1230K', '-123.02'),
+            array('1230L', '-123.03'),
+            array('1230M', '-123.04'),
+            array('1230N', '-123.05'),
+            array('1230O', '-123.06'),
+            array('1230P', '-123.07'),
+            array('1230Q', '-123.08'),
+            array('1230R', '-123.09'),
+            array('12300', '123.00'),
+        );
+    }
+
+    /**
+     * @dataProvider signalStringsProvider
+     */
+    public function testCreateFromSignalString($signalStr, $expected)
+    {
+        $amount = Amount::createFromSignalString($signalStr);
+        $this->assertSame(
+            $expected,
+            $amount->getString(2)
+        );
+        $this->assertSame(
+            $signalStr,
+            $amount->getSignalString()
+        );
+    }
+
+    public function testInvalidSignalString()
+    {
+        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        Amount::createFromSignalString('Q123Q'); // not a valid signal string
+    }
+
+    public function testAutomaticStringConversion()
+    {
+        $this->assertSame(
+            '100.00',
+            (string)new Amount('100')
+        );
     }
 }

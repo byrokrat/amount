@@ -34,11 +34,12 @@ class Amount
      * Create amount from numerical string
      *
      * @param string $amount
+     * @throws InvalidArgumentException If $amount is not valid
      */
-    public function __construct($amount = '0')
+    public function __construct($amount)
     {
-        if (!is_string($amount) || !is_numeric($amount)) {
-            throw new InvalidAmountException("Amount must be a numerical string");
+        if (!is_string($amount) || !preg_match("/^[+-]?\d*\.?\d*$/", $amount)) {
+            throw new InvalidArgumentException("Constructor expects a numerical string");
         }
         $this->amount = $amount;
     }
@@ -51,49 +52,38 @@ class Amount
      *
      * @param  int|float $number
      * @return Amount
-     * @throws InvalidAmountException If $int is not an integer
+     * @throws InvalidArgumentException If $number is not an integer or float
      */
     public static function createFromNumber($number)
     {
         if (!is_int($number) && !is_float($number)) {
-            throw new InvalidAmountException(
-                "createFromNumber() expects an integer or a floating point number"
+            throw new InvalidArgumentException(
+                "createFromNumber() expects an integer or float, found: ".gettype($number)
             );
         }
-        return new static(sprintf('%F', $number));
+
+        return new static(
+            number_format($number, static::getInternalPrecision(), '.', '')
+        );
     }
 
     /**
-     * Create amount from a localized formatted string
+     * Create amount from a formatted string
      *
-     * @param  string $strAmount
-     * @param  string $point Decimal point character. Replaced with '.' If
-     *     omitted omitted the 'mon_decimal_point' value of the current monetary
-     *     locale is used.
-     * @param  string $sep   Group separator. Replaced with the empty string. If
-     *     omitted omitted the 'mon_thousands_sep' value of the current monetary
-     *     locale is used.
+     * @param  string $amount The formatted string to be parsed
+     * @param  string $point  Decimal point character in formatted string
+     * @param  string $sep    Group separator in formattet string
      * @return Amount
      */
-    public static function createFromLocaleString($strAmount, $point = null, $sep = null)
+    public static function createFromFormat($amount, $point = '.', $sep = '')
     {
-        assert('is_string($strAmount)');
-
-        if (is_null($sep)) {
-            $locale = localeconv();
-            $sep = $locale['mon_thousands_sep'];
-            if (is_null($point)) {
-                $point = $locale['mon_decimal_point'];
-            }
-        }
-
-        assert('is_string($point)');
-        assert('is_string($sep)');
-
-        $strAmount = str_replace($point, '.', $strAmount);
-        $strAmount = str_replace($sep, '', $strAmount);
-
-        return new static($strAmount);
+        return new static(
+            str_replace(
+                array($point, $sep, '|'),
+                array('|', '', '.'),
+                $amount
+            )
+        );
     }
 
     /**
@@ -104,26 +94,26 @@ class Amount
      * last digit is converted to an alphabetic character according to schema:
      * 0 => å, 1 => J, 2 => K, ... 9 => R.
      * 
-     * @param  string $strAmount
+     * @param  string $signalStr
      * @return Amount
-     * @throws InvalidAmountException If amount is not a valid signal string
+     * @throws InvalidArgumentException If $signalStr is not a valid signal string
      */
-    public static function createFromSignalString($strAmount)
+    public static function createFromSignalString($signalStr)
     {
-        if (!preg_match("/^\d+(å|[JKLMNOPQR])?$/", $strAmount)) {
-            throw new InvalidAmountException("Amount must be a valid singal string");
+        if (!preg_match("/^\d+(å|[JKLMNOPQR])?$/", $signalStr)) {
+            throw new InvalidArgumentException("createFromSignalString() expects a valid signal string");
         }
 
-        if (!is_numeric($strAmount)) {
-            $strAmount = '-' . str_replace(
+        if (!is_numeric($signalStr)) {
+            $signalStr = '-' . str_replace(
                 self::$signals,
                 array_keys(self::$signals),
-                $strAmount
+                $signalStr
             );
         }
 
         return new static(
-            preg_replace("/^(-?\d*)(\d\d)$/", "$1.$2", $strAmount, 1)
+            preg_replace("/^(-?\d*)(\d\d)$/", "$1.$2", $signalStr, 1)
         );
     }
 
@@ -148,7 +138,7 @@ class Amount
         return bcadd(
             $this->getAmount(),
             '0.0',
-            $precision >= 0 ? $precision : $this->getDefaultPrecision()
+            $precision >= 0 ? $precision : $this->getDisplayPrecision()
         );
     }
 
@@ -163,53 +153,13 @@ class Amount
     }
 
     /**
-     * Get amount as signal string
-     *
-     * Signal strings does not contain a decimal digit separator. Instead the
-     * last two digits are always considered decimals. For negative values the
-     * last digit is converted to an alphabetic character according to schema:
-     * 0 => å, 1 => J, 2 => K, ... 9 => R.
-     *
-     * @return string
-     */
-    public function getSignalString()
-    {
-        if ($this->isNegative()) {
-            $strAmount = $this->getAbsolute()->getString(2);
-            $strAmount = substr($strAmount, 0, -1) . self::$signals[substr($strAmount, -1)];
-        } else {
-            $strAmount = $this->getString(2);
-        }
-
-        return str_replace('.', '', $strAmount);
-    }
-
-    /**
-     * Locale aware format amount
-     *
-     * Note that amount is converted to a floating point number before
-     * formatting takes place. This may lead to a loss of precision.
-     *
-     * @param  string $format Format string as accepted by money_format().
-     *     Defaults to '%!n': national currency format without currency symbol.
-     * @return string
-     */
-    public function format($format = '%!n')
-    {
-        assert('is_string($format)');
-        return money_format($format, $this->getFloat());
-    }
-
-    /**
      * Get amount as integer
-     *
-     * Amount is evaluated using intval
      *
      * @return int
      */
     public function getInt()
     {
-        return intval($this->getAmount());
+        return (int)$this->getFloat(0);
     }
 
     /**
@@ -225,8 +175,30 @@ class Amount
     {
         return (float)round(
             floatval($this->getAmount()),
-            $precision >= 0 ? $precision : $this->getDefaultPrecision()
+            $precision >= 0 ? $precision : $this->getDisplayPrecision()
         );
+    }
+
+    /**
+     * Get amount as signal string
+     *
+     * Signal strings does not contain a decimal digit separator. Instead the
+     * last two digits are always considered decimals. For negative values the
+     * last digit is converted to an alphabetic character according to schema:
+     * 0 => å, 1 => J, 2 => K, ... 9 => R.
+     *
+     * @return string
+     */
+    public function getSignalString()
+    {
+        if ($this->isNegative()) {
+            $signalStr = $this->getAbsolute()->getString(2);
+            $signalStr = substr($signalStr, 0, -1) . self::$signals[substr($signalStr, -1)];
+        } else {
+            $signalStr = $this->getString(2);
+        }
+
+        return str_replace('.', '', $signalStr);
     }
 
     /**
@@ -266,15 +238,15 @@ class Amount
     /**
      * Get new Amount with the value of instance multiplied with $amount
      *
-     * @param  Amount $amount
+     * @param  int|float|string|Amount $amount
      * @return Amount
      */
-    public function multiplyWith(Amount $amount)
+    public function multiplyWith($amount)
     {
         return new static(
             bcmul(
                 $this->getAmount(),
-                $amount->getAmount(),
+                $this->castToString($amount),
                 $this->getInternalPrecision()
             )
         );
@@ -283,15 +255,15 @@ class Amount
     /**
      * Get new Amount with the value of instance divided by $amount
      *
-     * @param  Amount $amount
+     * @param  int|float|string|Amount $amount
      * @return Amount
      */
-    public function divideBy(Amount $amount)
+    public function divideBy($amount)
     {
         return new static(
             bcdiv(
                 $this->getAmount(),
-                $amount->getAmount(),
+                $this->castToString($amount),
                 $this->getInternalPrecision()
             )
         );
@@ -418,11 +390,11 @@ class Amount
     }
 
     /**
-     * Get the default display precision for this currency
+     * Get the default display precision
      *
      * @return int
      */
-    protected function getDefaultPrecision()
+    public static function getDisplayPrecision()
     {
         return 2;
     }
@@ -432,8 +404,34 @@ class Amount
      *
      * @return int
      */
-    protected function getInternalPrecision()
+    public static function getInternalPrecision()
     {
         return 10;
+    }
+
+    /**
+     * Get a numerical string from input
+     *
+     * @param  int|float|string|Amount $amount
+     * @return string
+     * @throws InvalidArgumentException If $amount is does not evaluate to a numberical string
+     */
+    private function castToString($amount)
+    {
+        switch (gettype($amount)) {
+            case 'integer':
+            case 'double':
+                $amount = static::createFromNumber($amount);
+                break;
+            case 'string':
+                $amount = new static($amount);
+                break;
+        }
+
+        if (!$amount instanceof Amount) {
+            throw new InvalidArgumentException("Supplied argument is not valid");
+        }
+
+        return $amount->getAmount();
     }
 }
