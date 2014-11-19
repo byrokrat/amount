@@ -47,14 +47,23 @@ class Amount
     /**
      * Create amount from integer or floating point number
      *
-     * Note that amount internally is stored as a string. Converting number to
-     * string may involve rounding and lead to a loss of precision.
+     * It is important to note that computers internally use the binary floating
+     * point format and cannot accurately represent a number like 0.1, 0.2 or
+     * 0.3 at all. Using floating point numbers leads to a loss of precision.
+     * For example `floor((0.1+0.7)*10)` will usually return 7 instead of the
+     * expected 8, since the internal representation will be something like
+     * 7.9999999999999991118....
+     * 
+     * For this reason floats should never ne used to store monetary data. This
+     * method exists for rare situations when converting from native formats is
+     * inevitable. Unless you know what you are doing it should NOT be used.
      *
      * @param  int|float $number
+     * @param  int $precision Optional decimal precision used in calculation
      * @return Amount
      * @throws InvalidArgumentException If $number is not an integer or float
      */
-    public static function createFromNumber($number)
+    public static function createFromNumber($number, $precision = -1)
     {
         if (!is_int($number) && !is_float($number)) {
             throw new InvalidArgumentException(
@@ -63,7 +72,12 @@ class Amount
         }
 
         return new static(
-            number_format($number, static::getInternalPrecision(), '.', '')
+            number_format(
+                $number,
+                $precision >= 0 ? $precision : self::getInternalPrecision(),
+                '.',
+                ''
+            )
         );
     }
 
@@ -79,8 +93,8 @@ class Amount
     {
         return new static(
             str_replace(
-                array($point, $sep, '|'),
-                array('|', '', '.'),
+                array($point, $sep, '[~placeholder~]'),
+                array('[~placeholder~]', '', '.'),
                 $amount
             )
         );
@@ -128,15 +142,34 @@ class Amount
     }
 
     /**
+     * Get new Amount rounded to $precision number of decimal digit using $rounder
+     *
+     * @param  integer $precision
+     * @param  Rounder $rounder
+     * @return Amount
+     */
+    public function roundTo($precision = -1, Rounder $rounder = null)
+    {
+        $rounder = $rounder ?: $this->getDefaultRounder();
+        return new static(
+            $rounder->round(
+                $this->getAmount(),
+                $precision >= 0 ? $precision : $this->getDisplayPrecision()
+            )
+        );
+    }
+
+    /**
      * Get amount as string
      *
-     * @param  int $precision Optional decimal precision
+     * @param  integer $precision Optional decimal precision
+     * @param  Rounder $rounder
      * @return string
      */
-    public function getString($precision = -1)
+    public function getString($precision = -1, Rounder $rounder = null)
     {
         return bcadd(
-            $this->getAmount(),
+            $this->roundTo($precision, $rounder)->getAmount(),
             '0.0',
             $precision >= 0 ? $precision : $this->getDisplayPrecision()
         );
@@ -155,28 +188,35 @@ class Amount
     /**
      * Get amount as integer
      *
-     * @return int
+     * @param  Rounder $rounder
+     * @return integer
      */
-    public function getInt()
+    public function getInt(Rounder $rounder = null)
     {
-        return (int)$this->getFloat(0);
+        return (int)$this->getFloat(0, $rounder);
     }
 
     /**
      * Get amount as float
      *
-     * Note that amount internally is stored as a string. Converting to floating
-     * point number may lead to a loss of precision.
+     * It is important to note that computers internally use the binary floating
+     * point format and cannot accurately represent a number like 0.1, 0.2 or
+     * 0.3 at all. Using floating point numbers leads to a loss of precision.
+     * For example `floor((0.1+0.7)*10)` will usually return 7 instead of the
+     * expected 8, since the internal representation will be something like
+     * 7.9999999999999991118....
+     * 
+     * For this reason floats should never ne used to store monetary data. This
+     * method exists for rare situations when converting to native formats is
+     * inevitable. Unless you know what you are doing it should NOT be used.
      *
-     * @param  int   $precision Optional decimal precision
+     * @param  integer $precision Optional decimal precision
+     * @param  Rounder $rounder
      * @return float
      */
-    public function getFloat($precision = -1)
+    public function getFloat($precision = -1, Rounder $rounder = null)
     {
-        return (float)round(
-            floatval($this->getAmount()),
-            $precision >= 0 ? $precision : $this->getDisplayPrecision()
-        );
+        return floatval($this->getString($precision, $rounder));
     }
 
     /**
@@ -187,15 +227,16 @@ class Amount
      * last digit is converted to an alphabetic character according to schema:
      * 0 => å, 1 => J, 2 => K, ... 9 => R.
      *
+     * @param  Rounder $rounder
      * @return string
      */
-    public function getSignalString()
+    public function getSignalString(Rounder $rounder = null)
     {
         if ($this->isNegative()) {
-            $signalStr = $this->getAbsolute()->getString(2);
+            $signalStr = $this->getAbsolute()->getString(2, $rounder);
             $signalStr = substr($signalStr, 0, -1) . self::$signals[substr($signalStr, -1)];
         } else {
-            $signalStr = $this->getString(2);
+            $signalStr = $this->getString(2, $rounder);
         }
 
         return str_replace('.', '', $signalStr);
@@ -205,15 +246,16 @@ class Amount
      * Get new Amount with the value of $amount added to instance
      *
      * @param  Amount $amount
+     * @param  int $precision Optional decimal precision used in calculation
      * @return Amount
      */
-    public function add(Amount $amount)
+    public function add(Amount $amount, $precision = -1)
     {
         return new static(
             bcadd(
                 $this->getAmount(),
                 $amount->getAmount(),
-                $this->getInternalPrecision()
+                $precision >= 0 ? $precision : $this->getInternalPrecision()
             )
         );
     }
@@ -222,15 +264,16 @@ class Amount
      * Get new Amount with the value of $amount subtracted from instance
      *
      * @param  Amount $amount
+     * @param  int $precision Optional decimal precision used in calculation
      * @return Amount
      */
-    public function subtract(Amount $amount)
+    public function subtract(Amount $amount, $precision = -1)
     {
         return new static(
             bcsub(
                 $this->getAmount(),
                 $amount->getAmount(),
-                $this->getInternalPrecision()
+                $precision >= 0 ? $precision : $this->getInternalPrecision()
             )
         );
     }
@@ -239,15 +282,16 @@ class Amount
      * Get new Amount with the value of instance multiplied with $amount
      *
      * @param  int|float|string|Amount $amount
+     * @param  int $precision Optional decimal precision used in calculation
      * @return Amount
      */
-    public function multiplyWith($amount)
+    public function multiplyWith($amount, $precision = -1)
     {
         return new static(
             bcmul(
                 $this->getAmount(),
                 $this->castToString($amount),
-                $this->getInternalPrecision()
+                $precision >= 0 ? $precision : $this->getInternalPrecision()
             )
         );
     }
@@ -256,15 +300,16 @@ class Amount
      * Get new Amount with the value of instance divided by $amount
      *
      * @param  int|float|string|Amount $amount
+     * @param  int $precision Optional decimal precision used in calculation
      * @return Amount
      */
-    public function divideBy($amount)
+    public function divideBy($amount, $precision = -1)
     {
         return new static(
             bcdiv(
                 $this->getAmount(),
                 $this->castToString($amount),
-                $this->getInternalPrecision()
+                $precision >= 0 ? $precision : $this->getInternalPrecision()
             )
         );
     }
@@ -273,14 +318,15 @@ class Amount
      * Compare to amount
      *
      * @param  Amount $amount
+     * @param  int $precision Optional decimal precision used in calculation
      * @return int 0 if instance and $amount are equal, 1 if instance is larger, -1 otherwise.
      */
-    public function compareTo(Amount $amount)
+    public function compareTo(Amount $amount, $precision = -1)
     {
         return bccomp(
             $this->getAmount(),
             $amount->getAmount(),
-            $this->getInternalPrecision()
+            $precision >= 0 ? $precision : $this->getInternalPrecision()
         );
     }
 
@@ -288,85 +334,93 @@ class Amount
      * Check if instance equals amount
      *
      * @param  Amount $amount
+     * @param  int $precision Optional decimal precision used in calculation
      * @return bool
      */
-    public function equals(Amount $amount)
+    public function equals(Amount $amount, $precision = -1)
     {
-        return 0 == $this->compareTo($amount);
+        return 0 == $this->compareTo($amount, $precision);
     }
 
     /**
      * Check if instance is less than amount
      *
      * @param  Amount $amount
+     * @param  int $precision Optional decimal precision used in calculation
      * @return bool
      */
-    public function isLessThan(Amount $amount)
+    public function isLessThan(Amount $amount, $precision = -1)
     {
-        return -1 == $this->compareTo($amount);
+        return -1 == $this->compareTo($amount, $precision);
     }
 
     /**
      * Check if instance is less than or equals amount
      *
      * @param  Amount $amount
+     * @param  int $precision Optional decimal precision used in calculation
      * @return bool
      */
-    public function isLessThanOrEquals(Amount $amount)
+    public function isLessThanOrEquals(Amount $amount, $precision = -1)
     {
-        return $this->isLessThan($amount) || $this->equals($amount);
+        return $this->isLessThan($amount, $precision) || $this->equals($amount, $precision);
     }
 
     /**
      * Check if instance is greater than amount
      *
      * @param  Amount $amount
+     * @param  int $precision Optional decimal precision used in calculation
      * @return bool
      */
-    public function isGreaterThan(Amount $amount)
+    public function isGreaterThan(Amount $amount, $precision = -1)
     {
-        return 1 == $this->compareTo($amount);
+        return 1 == $this->compareTo($amount, $precision);
     }
 
     /**
      * Check if instance is greater than or equals amount
      *
      * @param  Amount $amount
+     * @param  int $precision Optional decimal precision used in calculation
      * @return bool
      */
-    public function isGreaterThanOrEquals(Amount $amount)
+    public function isGreaterThanOrEquals(Amount $amount, $precision = -1)
     {
-        return $this->isGreaterThan($amount) || $this->equals($amount);
+        return $this->isGreaterThan($amount, $precision) || $this->equals($amount, $precision);
     }
 
     /**
      * Check if amount is zero
      *
+     * @param  int $precision Optional decimal precision used in calculation
      * @return bool
      */
-    public function isZero()
+    public function isZero($precision = -1)
     {
-        return $this->equals(new Amount('0'));
+        return $this->equals(new static('0'), $precision);
     }
 
     /**
      * Check if amount is greater than zero
      *
+     * @param  int $precision Optional decimal precision used in calculation
      * @return bool
      */
-    public function isPositive()
+    public function isPositive($precision = -1)
     {
-        return $this->isGreaterThan(new Amount('0'));
+        return $this->isGreaterThan(new static('0'), $precision);
     }
 
     /**
      * Check if amount is less than zero
      *
+     * @param  int $precision Optional decimal precision used in calculation
      * @return bool
      */
-    public function isNegative()
+    public function isNegative($precision = -1)
     {
-        return $this->isLessThan(new Amount('0'));
+        return $this->isLessThan(new static('0'), $precision);
     }
 
     /**
@@ -376,7 +430,12 @@ class Amount
      */
     public function getInverted()
     {
-        return $this->multiplyWith(new Amount('-1'));
+        return $this->isNegative()
+            ? $this->getAbsolute()
+            : new static(
+                '-'
+                .str_replace('+', '', $this->getAmount())
+            );
     }
 
     /**
@@ -386,7 +445,7 @@ class Amount
      */
     public function getAbsolute()
     {
-        return $this->isNegative() ? $this->getInverted() : clone $this;
+        return new static(str_replace('-', '', $this->getAmount()));
     }
 
     /**
@@ -400,13 +459,23 @@ class Amount
     }
 
     /**
-     * Get the internal precision used in computations
+     * Get the default internal precision used in computations
      *
      * @return int
      */
     public static function getInternalPrecision()
     {
         return 10;
+    }
+
+    /**
+     * Get default rounding strategy
+     *
+     * @return Rounder
+     */
+    public static function getDefaultRounder()
+    {
+        return new Rounder\RoundHalfToEven;
     }
 
     /**

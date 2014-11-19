@@ -44,42 +44,12 @@ class AmountTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testRounding()
+    public function testRoundTo()
     {
-        $amount = new Amount('123.0');
-        $this->assertSame("123.00", $amount->getString(2));
-        $this->assertSame(123.00, $amount->getFloat(2));
-        $this->assertSame(123, $amount->getInt());
-
-        $amount = new Amount('123.111');
-        $this->assertSame("123.11", $amount->getString(2));
-        $this->assertSame(123.11, $amount->getFloat(2));
-        $this->assertSame(123, $amount->getInt());
-
-        $amount = new Amount('123.119');
-        $this->assertSame("123.11", $amount->getString(2));
-        $this->assertSame("123.119", $amount->getString(3));
-        $this->assertSame(123.12, $amount->getFloat(2));
-        $this->assertSame(123.119, $amount->getFloat(3));
-        $this->assertSame(123, $amount->getInt());
-
-        $amount = new Amount('-123.119');
-        $this->assertSame("-123.11", $amount->getString(2));
-        $this->assertSame(-123.12, $amount->getFloat(2));
-        $this->assertSame(-123, $amount->getInt());
-
-        $amount = new Amount('-123.141');
-        $this->assertSame("-123.14", $amount->getString(2));
-
-        $amount = new Amount('-123.149');
-        $this->assertSame("-123.14", $amount->getString(2));
-        $this->assertSame(-123.15, $amount->getFloat(2));
-        $this->assertSame(-123, $amount->getInt());
-
-        $amount1 = new Amount('1');
-        $amount = $amount1->divideBy(7);
-        $this->assertSame('0.1428571428', $amount->getAmount());
-        $this->assertSame('0.14', $amount->getString(2));
+        $this->assertEquals(
+            '100',
+            (new Amount('99.5'))->roundTo(0)
+        );
     }
 
     public function testAdd()
@@ -114,6 +84,12 @@ class AmountTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('10', $amount10->getString(0));
     }
 
+    public function testCastToStringArgumentException()
+    {
+        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        (new Amount('1'))->divideBy(null);
+    }
+
     public function testComparisons()
     {
         $amount100 = new Amount('100');
@@ -134,12 +110,12 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 
     public function testSigns()
     {
-        $zero = new Amount('0');
+        $zero = new Amount('+0');
         $this->assertTrue($zero->isZero());
         $this->assertFalse($zero->isPositive());
         $this->assertFalse($zero->isNegative());
 
-        $ten = new Amount('10');
+        $ten = new Amount('+10');
         $this->assertFalse($ten->isZero());
         $this->assertTrue($ten->isPositive());
         $this->assertFalse($ten->isNegative());
@@ -163,8 +139,23 @@ class AmountTest extends \PHPUnit_Framework_TestCase
     public function testBigIntegerSupport()
     {
         $this->assertSame(
-            PHP_INT_MAX/2,
-            Amount::createFromNumber(PHP_INT_MAX)->multiplyWith(2)->divideBy(4)->getFloat()
+            PHP_INT_MAX,
+            Amount::createFromNumber(PHP_INT_MAX)->multiplyWith(PHP_INT_MAX)->divideBy(PHP_INT_MAX)->getInt()
+        );
+        $this->assertSame(
+            '1000.00',
+            (new Amount('100000000000000000000000'))
+                ->multiplyWith('10000000000')
+                ->divideBy('1000000000000000000000000000000')
+                ->getString()
+        );
+    }
+
+    public function testFloatingPointPrecision()
+    {
+        $this->assertSame(
+            8.0,
+            (new Amount('0.1'))->add(new Amount('0.7'))->multiplyWith(10)->getFloat()
         );
     }
 
@@ -250,11 +241,13 @@ class AmountTest extends \PHPUnit_Framework_TestCase
         $amount = Amount::createFromSignalString($signalStr);
         $this->assertSame(
             $expected,
-            $amount->getString(2)
+            $amount->getString(2),
+            "Conversion to decimal"
         );
         $this->assertSame(
             $signalStr,
-            $amount->getSignalString()
+            $amount->getSignalString(),
+            "Conversion back to signal string"
         );
     }
 
