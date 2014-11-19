@@ -139,10 +139,6 @@ class AmountTest extends \PHPUnit_Framework_TestCase
     public function testBigIntegerSupport()
     {
         $this->assertSame(
-            PHP_INT_MAX,
-            Amount::createFromNumber(PHP_INT_MAX)->multiplyWith(PHP_INT_MAX)->divideBy(PHP_INT_MAX)->getInt()
-        );
-        $this->assertSame(
             '1000.00',
             (new Amount('100000000000000000000000'))
                 ->multiplyWith('10000000000')
