@@ -59,7 +59,7 @@ Usage
 use ledgr\amount\Amount;
 $amount = new Amount('100.6');
 $amount->isGreaterThan(new Amount('50'));  // true
-$rounded = $amount->roundTo(0);            // create new amount rounded to 0 decimal digits
+$rounded = $amount->roundTo(0);            // round to 0 decimal digits
 echo $rounded;                             // 101
 ```
 
@@ -109,8 +109,8 @@ Working with currencies
 -----------------------
 
 The currency subsystem helps prevent bugs where values in different currencies are
-mixed (for example added togheter). Currency objects subclass `Amount` and work in
-the exact same way, with the added feature that they know their defined currency.
+mixed (for example added together). Currency objects subclass `Amount` and works in
+the same way, with the added feature that they know their defined currency.
 
 ```php
 use ledgr\amount\Currency\SEK;
@@ -133,20 +133,20 @@ your currency's behaviour.
 
 ### Exchanging
 
-Exchanging currencies is supported. Note that you must supply the correct exchange
-rate.
+Exchanging currencies is supported using `createFromExchange`. Note that you must
+supply the correct exchange rate.
 
 ```php
 use ledgr\amount\Currency\SEK;
 use ledgr\amount\Currency\EUR;
-// One euro is exchanged into swedish krona using the exchange rate 9.27198929
-// resulting in the value of 9.27198929 swedish krona.
+// One euro is exchanged into swedish kronas using the exchange rate 9.27198929
+// resulting in the value of SEK 9.27198929
 $sek = SEK::createFromExchange(new EUR('1'), '9.27198929');
 ```
 
 ### Formatting currencies
 
-Currency objects can easily be formatted using php's `NumberFormatter``class.
+Currency objects can easily be formatted using php's built in `NumberFormatter`.
 
 ```php
 // Create some amount of euros
