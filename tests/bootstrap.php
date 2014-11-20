@@ -18,3 +18,6 @@ include_once "$src/Rounder/RoundHalfAwayFromZero.php";
 include_once "$src/Rounder/RoundHalfTowardsZero.php";
 include_once "$src/Rounder/RoundHalfToEven.php";
 include_once "$src/Rounder/RoundHalfToOdd.php";
+include_once "$src/Currency.php";
+include_once "$src/Currency/SEK.php";
+include_once "$src/Currency/EUR.php";

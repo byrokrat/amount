@@ -475,7 +475,7 @@ class Amount
      */
     public static function getDefaultRounder()
     {
-        return new Rounder\RoundHalfToEven;
+        return new Rounder\RoundHalfUp;
     }
 
     /**

@@ -18,7 +18,9 @@ Features
  * Immutable value object.
  * Using the [bcmath](http://php.net/manual/en/book.bc.php) extension for
    arbitrary floating point arithmetic precision.
- * Support for multiple rounding strategies
+ * Currency support to prevent mixing currencies.
+ * Simple interface for defining new currencies.
+ * Support for multiple rounding strategies.
  * Support for the signal string format as used in the swedish direct debit system.
 
 Api
@@ -29,10 +31,11 @@ Method signature                                    | returns | description
 :-------------------------------------------------- | :------ | :-------------------------------------------
 **__construct(string $amount)**                     | Amount  | Create new instance
 **getAmount()**                                     | string  | Get raw amount
-**getString([[int $precision], Rounder $rounder])** | string  | Get amount as string
+**roundTo([int $precision, [Rounder $rounder]])**   | Amount  | Get new Amount rounded to $precision
+**getString([int $precision, [Rounder $rounder]])** | string  | Get amount as string
 **__tostring()**                                    | string  | Get amount as string
 **getInt([Rounder $rounder])**                      | integer | Get amount as integer (WARNING)
-**getFloat([[int $precision], Rounder $rounder])**  | float   | Get amount as float (WARNING)
+**getFloat([int $precision, [Rounder $rounder]])**  | float   | Get amount as float (WARNING)
 **getSignalString([Rounder $rounder])**             | string  | Get amount as a signal string
 **add(Amount $amount)**                             | Amount  | Get new Amount with $amount added
 **subtract(Amount $amount)**                        | Amount  | Get new Amount with $amount subtracted
@@ -54,9 +57,10 @@ Usage
 -----
 ```php
 use ledgr\amount\Amount;
-$amount = new Amount('100.5');
+$amount = new Amount('100.6');
 $amount->isGreaterThan(new Amount('50'));  // true
-$amount->getString();                      // 100.50
+$rounded = $amount->roundTo(0);            // create new amount rounded to 0 decimal digits
+echo $rounded;                             // 101
 ```
 
 Creating Amounts from other formats
@@ -99,3 +103,58 @@ echo $amount;  // outputs 2000.50
 The signal string format contans no decimal point and negative amounts are signaled
 using a letter instead of the final digit. Create Amounts from signal strings
 using the static method **createFromSignalString**.
+
+
+Working with currencies
+-----------------------
+
+The currency subsystem helps prevent bugs where values in different currencies are
+mixed (for example added togheter). Currency objects subclass `Amount` and work in
+the exact same way, with the added feature that they know their defined currency.
+
+```php
+use ledgr\amount\Currency\SEK;
+use ledgr\amount\Currency\EUR;
+$sek = new SEK('100');
+$added = $sek->add(new EUR('1')); // throws an exception
+$added = $sek->add(new SEK('1')); // works as intended
+```
+
+### Creating new currencies
+
+Only the [`SEK`](/src/Currency/SEK.php) and [`EUR`](/src/Currency/EUR.php) currencies
+are shipped with this package. Creating new currencies however is straight forward.
+Simply subclass the [`Currency`](/src/Currency.php) class and define `getCurrencyCode()`.
+See the [`currency subpackage`](/src/Currency/) for reference.
+
+Additionaly you may override `getDisplayPrecision()`, `getInternalPrecision()` and
+`getDefaultRounder()` inherited from [`Amount`](/src/Amount.php) to further define
+your currency's behaviour.
+
+### Exchanging
+
+Exchanging currencies is supported. Note that you must supply the correct exchange
+rate.
+
+```php
+use ledgr\amount\Currency\SEK;
+use ledgr\amount\Currency\EUR;
+// One euro is exchanged into swedish krona using the exchange rate 9.27198929
+// resulting in the value of 9.27198929 swedish krona.
+$sek = SEK::createFromExchange(new EUR('1'), '9.27198929');
+```
+
+### Formatting currencies
+
+Currency objects can easily be formatted using php's `NumberFormatter``class.
+
+```php
+// Create some amount of euros
+$money = new EUR('1234567.89');
+
+// Create a currency formatter with swedish formatting rules
+$formatter = new NumberFormatter('sv_SE', NumberFormatter::CURRENCY);
+
+// Format euros according to swedish standards, output 1 234 567:89 €
+echo $formatter->formatCurrency($money->getFloat(), $money->getCurrencyCode());
+```
