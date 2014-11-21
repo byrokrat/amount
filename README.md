@@ -19,11 +19,11 @@ Features
  * Immutable value object.
  * Using the [bcmath](http://php.net/manual/en/book.bc.php) extension for
    arbitrary floating point arithmetic precision.
- * Currency support to prevent mixing currencies.
- * Simple interface for defining new currencies.
- * Support for multiple rounding strategies.
- * Support for allocating amounts based on ratios.
- * Support for the signal string format as used in the swedish direct debit system.
+ * [Currency](#working-with-currencies) support to prevent mixing currencies.
+ * Simple interface for [defining new currencies](#creating-new-currencies).
+ * Support for multiple [rounding](#rounding) strategies.
+ * Support for [allocating](#allocating) amounts based on ratios.
+ * Support for the [signal string](#signal-strings) format as used in the swedish direct debit system.
 
 
 Api
@@ -56,6 +56,7 @@ Method signature                                    | returns  | description
 **getInverted()**                                   | Amount   | Get new amount with sign inverted
 **getAbsolute()**                                   | Amount   | Get new amount with negative sign removed
 **allocate(array $ratios, [int $precision])**       | Amount[] | Allocate amount based on list of ratios
+
 
 Usage
 -----
@@ -163,6 +164,30 @@ $formatter = new NumberFormatter('sv_SE', NumberFormatter::CURRENCY);
 // Format euros according to swedish standards, output 1 234 567:89 €
 echo $formatter->formatCurrency($money->getFloat(), $money->getCurrencyCode());
 ```
+
+
+Rounding
+--------
+
+A number of rounding strategies are supported. To implement your own see the
+[Rounder](/src/Rounder.php) interface.
+
+```php
+namespace ledgr\amount;
+$amount = new Amount('1.5');
+echo $amount->roundTo(0, new Rounder\RoundUp);                // 2
+echo $amount->roundTo(0, new Rounder\RoundDown);              // 1
+echo $amount->roundTo(0, new Rounder\RoundTowardsZero);       // 1
+echo $amount->roundTo(0, new Rounder\RoundAwayFromZero);      // 2
+echo $amount->roundTo(0, new Rounder\RoundHalfUp);            // 2
+echo $amount->roundTo(0, new Rounder\RoundHalfDown);          // 1
+echo $amount->roundTo(0, new Rounder\RoundHalfTowardsZero);   // 1
+echo $amount->roundTo(0, new Rounder\RoundHalfAwayFromZero);  // 2
+echo $amount->roundTo(0, new Rounder\RoundHalfToEven);        // 2
+echo $amount->roundTo(0, new Rounder\RoundHalfToOdd);         // 1
+```
+
+For more info on rounding strategies se [wikipedia](https://en.wikipedia.org/wiki/Rounding).
 
 
 Allocating
