@@ -26,9 +26,9 @@ class Amount
     /**
      * @var array Substitution map for signal strings
      */
-    private static $signals = array(
+    private static $signals = [
         '0'=>'å', '1'=>'J', '2'=>'K', '3'=>'L', '4'=>'M', '5'=>'N', '6'=>'O', '7'=>'P', '8'=>'Q', '9'=>'R'
-    );
+    ];
 
     /**
      * Create amount from numerical string
@@ -93,8 +93,8 @@ class Amount
     {
         return new static(
             str_replace(
-                array($point, $sep, '[~placeholder~]'),
-                array('[~placeholder~]', '', '.'),
+                [$point, $sep, '[~placeholder~]'],
+                ['[~placeholder~]', '', '.'],
                 $amount
             )
         );
@@ -424,7 +424,7 @@ class Amount
     }
 
     /**
-     * Get new amount with sign inverted
+     * Get new Amount with sign inverted
      *
      * @return Amount
      */
@@ -439,7 +439,7 @@ class Amount
     }
 
     /**
-     * Get new amount with negative sign removed
+     * Get new Amount with negative sign removed
      *
      * @return Amount
      */
@@ -447,6 +447,36 @@ class Amount
     {
         return new static(str_replace('-', '', $this->getAmount()));
     }
+
+    /**
+     * Allocate amount based on a list of ratios
+     *
+     * @param  int[]|float[] $ratios List of ratios
+     * @param  int $precision Optional decimal precision used in calculation
+     * @return Amount[] The allocated amounts
+     */
+    public function allocate(array $ratios, $precision = -1)
+    {
+        $remainder = clone $this;
+        $results = [];
+        $total = array_sum($ratios);
+        $precision = $precision >= 0 ? $precision : $this->getDisplayPrecision();
+        $unit = new static(bcdiv('1', '1' . str_repeat('0', $precision), $precision));
+
+        foreach ($ratios as $ratio) {
+            $share = $this->multiplyWith($ratio)->divideBy($total)->roundTo($precision, new Rounder\RoundDown);
+            $results[] = $share;
+            $remainder = $remainder->subtract($share);
+        }
+
+        for ($i = 0; $remainder->isGreaterThanOrEquals($unit) > 0; $i++) {
+            $results[$i] = $results[$i]->add($unit);
+            $remainder = $remainder->subtract($unit);
+        }
+
+        return $results;
+    }
+
 
     /**
      * Get the default display precision

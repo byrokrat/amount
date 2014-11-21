@@ -6,11 +6,11 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 {
     public function invalidStringsProvider()
     {
-        return array(
-            array(123),               // not a string
-            array('alpha'),           // not numerical
-            array((string)0.0000001), // converts to something like 1.0E-7
-        );
+        return [
+            [123],               // not a string
+            ['alpha'],           // not numerical
+            [(string)0.0000001], // converts to something like 1.0E-7
+        ];
     }
 
     /**
@@ -24,12 +24,12 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 
     public function validStringsProvider()
     {
-        return array(
-            array('999', '999.00'),
-            array('1.1', '1.10'),
-            array('-123', '-123.00'),
-            array('.01', '0.01'),
-        );
+        return [
+            ['999', '999.00'],
+            ['1.1', '1.10'],
+            ['-123', '-123.00'],
+            ['.01', '0.01'],
+        ];
     }
 
     /**
@@ -155,23 +155,31 @@ class AmountTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testIntegerConversion()
+    {
+        $this->assertSame(
+            9,
+            (new Amount('8.5'))->getInt()
+        );
+    }
+
     public function numberProvider()
     {
-        return array(
-            array(100, '100.0000000000'),
-            array(100.0, '100.0000000000'),
-            array(100.00, '100.0000000000'),
-            array(100.000, '100.0000000000'),
-            array(123.23, '123.2300000000'),
-            array(-123.99, '-123.9900000000'),
-            array(0.23, '0.2300000000'),
-            array(0.0000001, '0.0000001000'),
-            array(1000000.0000001, '1000000.0000001000'),
-            array(-1000000.0000001, '-1000000.0000001000'),
-            array(999, '999.0000000000'),
-            array(1.0E+22, '10000000000000000000000.0000000000'),
-            array(1.000001E-4, '0.0001000001')
-        );
+        return [
+            [100, '100.0000000000'],
+            [100.0, '100.0000000000'],
+            [100.00, '100.0000000000'],
+            [100.000, '100.0000000000'],
+            [123.23, '123.2300000000'],
+            [-123.99, '-123.9900000000'],
+            [0.23, '0.2300000000'],
+            [0.0000001, '0.0000001000'],
+            [1000000.0000001, '1000000.0000001000'],
+            [-1000000.0000001, '-1000000.0000001000'],
+            [999, '999.0000000000'],
+            [1.0E+22, '10000000000000000000000.0000000000'],
+            [1.000001E-4, '0.0001000001'],
+        ];
     }
 
     /**
@@ -193,12 +201,12 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 
     public function formattedAmountsProvider()
     {
-        return array(
-            array('-10 000,00', ',', ' ', '-10000.00'),
-            array('1 234 567:89', ':', ' ', '1234567.89'),
-            array('1,234,567.89', '.', ',', '1234567.89'),
-            array('1.234.567,89', ',', '.', '1234567.89')
-        );
+        return [
+            ['-10 000,00', ',', ' ', '-10000.00'],
+            ['1 234 567:89', ':', ' ', '1234567.89'],
+            ['1,234,567.89', '.', ',', '1234567.89'],
+            ['1.234.567,89', ',', '.', '1234567.89'],
+        ];
     }
 
     /**
@@ -214,19 +222,19 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 
     public function signalStringsProvider()
     {
-        return array(
-            array('1230å', '-123.00'),
-            array('1230J', '-123.01'),
-            array('1230K', '-123.02'),
-            array('1230L', '-123.03'),
-            array('1230M', '-123.04'),
-            array('1230N', '-123.05'),
-            array('1230O', '-123.06'),
-            array('1230P', '-123.07'),
-            array('1230Q', '-123.08'),
-            array('1230R', '-123.09'),
-            array('12300', '123.00'),
-        );
+        return [
+            ['1230å', '-123.00'],
+            ['1230J', '-123.01'],
+            ['1230K', '-123.02'],
+            ['1230L', '-123.03'],
+            ['1230M', '-123.04'],
+            ['1230N', '-123.05'],
+            ['1230O', '-123.06'],
+            ['1230P', '-123.07'],
+            ['1230Q', '-123.08'],
+            ['1230R', '-123.09'],
+            ['12300', '123.00'],
+        ];
     }
 
     /**
@@ -258,6 +266,27 @@ class AmountTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             '100.00',
             (string)new Amount('100')
+        );
+    }
+
+    public function allocateProvider()
+    {
+        return [
+            [new Amount('100'), 0, [30, 70], [new Amount('30'), new Amount('70')]],
+            [new Amount('5'), 0, [30, 70], [new Amount('2'), new Amount('3')]],
+            [new Amount('5'), 0, [70, 30], [new Amount('4'), new Amount('1')]],
+            [new Amount('0.05'), 2, [70, 30], [new Amount('0.04'), new Amount('0.01')]],
+        ];
+    }
+
+    /**
+     * @dataProvider allocateProvider
+     */
+    public function testAllocate(Amount $amount, $precision, array $ratios, array $result)
+    {
+        $this->assertEquals(
+            $result,
+            $amount->allocate($ratios, $precision)
         );
     }
 }

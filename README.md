@@ -13,6 +13,7 @@ Value objects for monetary amounts.
 
 # ledgr/amount
 
+
 Features
 --------
  * Immutable value object.
@@ -21,37 +22,40 @@ Features
  * Currency support to prevent mixing currencies.
  * Simple interface for defining new currencies.
  * Support for multiple rounding strategies.
+ * Support for allocating amounts based on ratios.
  * Support for the signal string format as used in the swedish direct debit system.
+
 
 Api
 ---
 [`Amount`](/src/Amount.php) defines the following api:
 
-Method signature                                    | returns | description
-:-------------------------------------------------- | :------ | :-------------------------------------------
-**__construct(string $amount)**                     | Amount  | Create new instance
-**getAmount()**                                     | string  | Get raw amount
-**roundTo([int $precision, [Rounder $rounder]])**   | Amount  | Get new Amount rounded to $precision
-**getString([int $precision, [Rounder $rounder]])** | string  | Get amount as string
-**__tostring()**                                    | string  | Get amount as string
-**getInt([Rounder $rounder])**                      | integer | Get amount as integer (WARNING)
-**getFloat([int $precision, [Rounder $rounder]])**  | float   | Get amount as float (WARNING)
-**getSignalString([Rounder $rounder])**             | string  | Get amount as a signal string
-**add(Amount $amount)**                             | Amount  | Get new Amount with $amount added
-**subtract(Amount $amount)**                        | Amount  | Get new Amount with $amount subtracted
-**multiplyWith(mixed $amount)**                     | Amount  | Get new Amount multiplied with $amount
-**divideBy(mixed $amount)**                         | Amount  | Get new Amount with value divided by $amount
-**compareTo(Amount $amount)**                       | integer | 0 if equals, 1 if greater, -1 otherwise
-**equals(Amount $amount)**                          | boolean | Check if equals amount
-**isLessThan(Amount $amount)**                      | boolean | Check if less than amount
-**isLessThanOrEquals(Amount $amount)**              | boolean | Check if less than or equals amount
-**isGreaterThan(Amount $amount)**                   | boolean | Check if greater than amount
-**isGreaterThanOrEquals(Amount $amount)**           | boolean | Check if greater than or equals amount
-**isZero()**                                        | boolean | Check if amount is zero
-**isPositive()**                                    | boolean | Check if amount is greater than zero
-**isNegative()**                                    | boolean | Check if amount is less than zero
-**getInverted()**                                   | Amount  | Get new amount with sign inverted
-**getAbsolute()**                                   | Amount  | Get new amount with negative sign removed
+Method signature                                    | returns  | description
+:-------------------------------------------------- | :------- | :------------------------------------------
+**__construct(string $amount)**                     | Amount   | Create new instance
+**getAmount()**                                     | string   | Get raw amount
+**roundTo([int $precision, [Rounder $rounder]])**   | Amount   | Get new Amount rounded to $precision
+**getString([int $precision, [Rounder $rounder]])** | string   | Get amount as string
+**__tostring()**                                    | string   | Get amount as string
+**getInt([Rounder $rounder])**                      | integer  | Get amount as integer (WARNING)
+**getFloat([int $precision, [Rounder $rounder]])**  | float    | Get amount as float (WARNING)
+**getSignalString([Rounder $rounder])**             | string   | Get amount as a signal string
+**add(Amount $amount)**                             | Amount   | Get new Amount with $amount added
+**subtract(Amount $amount)**                        | Amount   | Get new Amount with $amount subtracted
+**multiplyWith(mixed $amount)**                     | Amount   | Get new Amount multiplied with $amount
+**divideBy(mixed $amount)**                         | Amount   | Get new Amount divided by $amount
+**compareTo(Amount $amount)**                       | integer  | 0 if equals, 1 if greater, -1 otherwise
+**equals(Amount $amount)**                          | boolean  | Check if equals amount
+**isLessThan(Amount $amount)**                      | boolean  | Check if less than amount
+**isLessThanOrEquals(Amount $amount)**              | boolean  | Check if less than or equals amount
+**isGreaterThan(Amount $amount)**                   | boolean  | Check if greater than amount
+**isGreaterThanOrEquals(Amount $amount)**           | boolean  | Check if greater than or equals amount
+**isZero()**                                        | boolean  | Check if amount is zero
+**isPositive()**                                    | boolean  | Check if amount is greater than zero
+**isNegative()**                                    | boolean  | Check if amount is less than zero
+**getInverted()**                                   | Amount   | Get new amount with sign inverted
+**getAbsolute()**                                   | Amount   | Get new amount with negative sign removed
+**allocate(array $ratios, [int $precision])**       | Amount[] | Allocate amount based on list of ratios
 
 Usage
 -----
@@ -62,6 +66,7 @@ $amount->isGreaterThan(new Amount('50'));  // true
 $rounded = $amount->roundTo(0);            // round to 0 decimal digits
 echo $rounded;                             // 101
 ```
+
 
 Creating Amounts from other formats
 -----------------------------------
@@ -158,3 +163,42 @@ $formatter = new NumberFormatter('sv_SE', NumberFormatter::CURRENCY);
 // Format euros according to swedish standards, output 1 234 567:89 €
 echo $formatter->formatCurrency($money->getFloat(), $money->getCurrencyCode());
 ```
+
+
+Allocating
+----------
+
+Allocating is the process of dividing an amount based on ratios in such a way that
+the smallest unit is not divided (every currency has a smallest unit that is
+non-dividable) but instead handed to the receiver next in line.
+
+The ratios can be seen as (but does not have to be) percentages. A hundred units
+can thous be divided to two receivers as
+
+```php
+use ledgr\amount\Amount;
+$money = new Amount('100');
+list($receiverA, $receiverB) = $money->allocate([30, 70]);
+echo $receiverA;    // 30
+echo $receiverB;    // 70
+```
+
+The strength of allocating becomes clear when we distribute a value that we are
+not able to divide evenly. In this case the order of the receivers is significant.
+
+```php
+use ledgr\amount\Amount;
+$money = new Amount('0.05');
+
+list($receiverA, $receiverB) = $money->allocate([30, 70]);
+echo $receiverA;    // 0.03
+echo $receiverB;    // 0.02
+
+list($receiverA, $receiverB) = $money->allocate([70, 30]);
+echo $receiverA;    // 0.04
+echo $receiverB;    // 0.01
+```
+
+In these examples the undividable unit used is `0.01`. This is the default behaviour.
+Change it either by specifying the `$precision` parameter or by overriding
+`getDisplayPrecision()` in your currency class.
