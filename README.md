@@ -91,7 +91,7 @@ methods exists for rare situations when converting to or from native formats is
 inevitable. Unless you know what you are doing they should **NOT** be used.
 
 For more information see the [php manual](http://php.net/manual/en/language.types.float.php)
-or (What Every Programmer Should Know About Floating-Point Arithmetic)[http://floating-point-gui.de/].
+or [What Every Programmer Should Know About Floating-Point Arithmetic](http://floating-point-gui.de/).
 
 ### Formatted numbers
 
@@ -187,7 +187,7 @@ echo $amount->roundTo(0, new Rounder\RoundHalfToEven);        // 2
 echo $amount->roundTo(0, new Rounder\RoundHalfToOdd);         // 1
 ```
 
-For more info on rounding strategies se [wikipedia](https://en.wikipedia.org/wiki/Rounding).
+For more info on rounding strategies see [wikipedia](https://en.wikipedia.org/wiki/Rounding).
 
 
 Allocating
