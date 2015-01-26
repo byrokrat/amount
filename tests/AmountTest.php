@@ -1,6 +1,6 @@
 <?php
 
-namespace ledgr\amount;
+namespace byrokrat\amount;
 
 class AmountTest extends \PHPUnit_Framework_TestCase
 {
@@ -18,7 +18,7 @@ class AmountTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidStrings($argument)
     {
-        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
         new Amount($argument);
     }
 
@@ -86,7 +86,7 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 
     public function testCastToStringArgumentException()
     {
-        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
         (new Amount('1'))->divideBy(null);
     }
 
@@ -195,7 +195,7 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 
     public function testInvalidNumber()
     {
-        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
         Amount::createFromNumber('string');
     }
 
@@ -257,7 +257,7 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 
     public function testInvalidSignalString()
     {
-        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
         Amount::createFromSignalString('Q123Q'); // not a valid signal string
     }
 

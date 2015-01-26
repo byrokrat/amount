@@ -1,20 +1,11 @@
 <?php
-/**
- * This program is free software. It comes without any warranty, to
- * the extent permitted by applicable law. You can redistribute it
- * and/or modify it under the terms of the Do What The Fuck You Want
- * To Public License, Version 2, as published by Sam Hocevar. See
- * http://www.wtfpl.net/ for more details.
- */
 
-namespace ledgr\amount;
+namespace byrokrat\amount;
 
 /**
  * Value class for working with and representing monetary amounts
  *
  * Uses the bcmath extension for arbitrary floating point arithmetic precision
- *
- * @author Hannes Forsgård <hannes.forsgard@fripost.org>
  */
 class Amount
 {
@@ -53,7 +44,7 @@ class Amount
      * For example `floor((0.1+0.7)*10)` will usually return 7 instead of the
      * expected 8, since the internal representation will be something like
      * 7.9999999999999991118....
-     * 
+     *
      * For this reason floats should never ne used to store monetary data. This
      * method exists for rare situations when converting from native formats is
      * inevitable. Unless you know what you are doing it should NOT be used.
@@ -107,7 +98,7 @@ class Amount
      * last two digits are always considered decimals. For negative values the
      * last digit is converted to an alphabetic character according to schema:
      * 0 => å, 1 => J, 2 => K, ... 9 => R.
-     * 
+     *
      * @param  string $signalStr
      * @return Amount
      * @throws InvalidArgumentException If $signalStr is not a valid signal string
@@ -205,7 +196,7 @@ class Amount
      * For example `floor((0.1+0.7)*10)` will usually return 7 instead of the
      * expected 8, since the internal representation will be something like
      * 7.9999999999999991118....
-     * 
+     *
      * For this reason floats should never ne used to store monetary data. This
      * method exists for rare situations when converting to native formats is
      * inevitable. Unless you know what you are doing it should NOT be used.

@@ -1,6 +1,6 @@
 <?php
 
-namespace ledgr\amount\Rounder;
+namespace byrokrat\amount\Rounder;
 
 class ToolkitTest extends \PHPUnit_Framework_TestCase
 {

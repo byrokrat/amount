@@ -1,8 +1,8 @@
 {
-    "name": "ledgr/amount",
+    "name": "byrokrat/amount",
     "description": "Value objects for monetary amounts",
     "keywords": ["monetary amount", "economics", "money", "currency"],
-    "homepage": "https://github.com/ledgr/amount",
+    "homepage": "https://github.com/byrokrat/amount",
     "type": "library",
     "license": "WTFPL",
     "authors": [
@@ -13,7 +13,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "ledgr\\amount\\": "src/"
+            "byrokrat\\amount\\": "src/"
         }
     },
     "require": {

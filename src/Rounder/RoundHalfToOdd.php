@@ -1,20 +1,11 @@
 <?php
-/**
- * This program is free software. It comes without any warranty, to
- * the extent permitted by applicable law. You can redistribute it
- * and/or modify it under the terms of the Do What The Fuck You Want
- * To Public License, Version 2, as published by Sam Hocevar. See
- * http://www.wtfpl.net/ for more details.
- */
 
-namespace ledgr\amount\Rounder;
+namespace byrokrat\amount\Rounder;
 
 /**
  * Round to nearest and break ties by rounding half-way values to nearest odd value
- *
- * @author Hannes Forsgård <hannes.forsgard@fripost.org>
  */
-class RoundHalfToOdd implements \ledgr\amount\Rounder
+class RoundHalfToOdd implements \byrokrat\amount\Rounder
 {
     use ToolkitConsumer;
 

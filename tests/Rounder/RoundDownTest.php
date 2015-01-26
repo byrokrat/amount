@@ -1,6 +1,6 @@
 <?php
 
-namespace ledgr\amount\Rounder;
+namespace byrokrat\amount\Rounder;
 
 class RoundDownTest extends \PHPUnit_Framework_TestCase
 {
@@ -10,7 +10,7 @@ class RoundDownTest extends \PHPUnit_Framework_TestCase
         $precision = 0;
         $expected = 'foobar';
 
-        $toolkit = $this->getMock('ledgr\amount\Rounder\Toolkit');
+        $toolkit = $this->getMock('byrokrat\amount\Rounder\Toolkit');
 
         $toolkit->expects($this->once())
             ->method('roundDown')

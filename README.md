@@ -1,18 +1,12 @@
-# ledgr/amount
+# Amount
 
-[![Packagist Version](https://img.shields.io/packagist/v/ledgr/amount.svg?style=flat-square)](https://packagist.org/packages/ledgr/amount)
-[![Build Status](https://img.shields.io/travis/ledgr/amount/master.svg?style=flat-square)](https://travis-ci.org/ledgr/amount)
-[![Quality Score](https://img.shields.io/scrutinizer/g/ledgr/amount.svg?style=flat-square)](https://scrutinizer-ci.com/g/ledgr/amount)
-[![Dependency Status](https://img.shields.io/gemnasium/ledgr/amount.svg?style=flat-square)](https://gemnasium.com/ledgr/amount)
+[![Packagist Version](https://img.shields.io/packagist/v/byrokrat/amount.svg?style=flat-square)](https://packagist.org/packages/byrokrat/amount)
+[![Build Status](https://img.shields.io/travis/byrokrat/amount/master.svg?style=flat-square)](https://travis-ci.org/byrokrat/amount)
+[![Quality Score](https://img.shields.io/scrutinizer/g/byrokrat/amount.svg?style=flat-square)](https://scrutinizer-ci.com/g/byrokrat/amount)
+[![Scrutinizer Coverage](https://img.shields.io/scrutinizer/coverage/g/byrokrat/amount.svg?style=flat-square)](https://scrutinizer-ci.com/g/byrokrat/amount/?branch=master)
+[![Dependency Status](https://img.shields.io/gemnasium/byrokrat/amount.svg?style=flat-square)](https://gemnasium.com/byrokrat/amount)
 
 Value objects for monetary amounts.
-
-> Install using **[composer](http://getcomposer.org/)**. Exists as
-> **[ledgr/amount](https://packagist.org/packages/ledgr/amount)**
-> in the **[packagist](https://packagist.org/)** repository.
-
-# ledgr/amount
-
 
 Features
 --------
@@ -25,6 +19,23 @@ Features
  * Support for [allocating](#allocating) amounts based on ratios.
  * Support for the [signal string](#signal-strings) format as used in the swedish direct debit system.
 
+Installation
+------------
+Install using [composer](http://getcomposer.org/). Exists as
+[byrokrat/amount](https://packagist.org/packages/byrokrat/amount)
+in the [packagist](https://packagist.org/) repository.
+
+    composer require byrokrat/amount
+
+Usage
+-----
+```php
+use byrokrat\amount\Amount;
+$amount = new Amount('100.6');
+$amount->isGreaterThan(new Amount('50'));  // true
+$rounded = $amount->roundTo(0);            // round to 0 decimal digits
+echo $rounded;                             // 101
+```
 
 Api
 ---
@@ -56,18 +67,6 @@ Method signature                                    | returns  | description
 **getInverted()**                                   | Amount   | Get new amount with sign inverted
 **getAbsolute()**                                   | Amount   | Get new amount with negative sign removed
 **allocate(array $ratios, [int $precision])**       | Amount[] | Allocate amount based on list of ratios
-
-
-Usage
------
-```php
-use ledgr\amount\Amount;
-$amount = new Amount('100.6');
-$amount->isGreaterThan(new Amount('50'));  // true
-$rounded = $amount->roundTo(0);            // round to 0 decimal digits
-echo $rounded;                             // 101
-```
-
 
 Creating Amounts from other formats
 -----------------------------------
@@ -103,24 +102,21 @@ $formattedAmount = "2 000:50";
 $amount = Amount::createFromFormat($formattedAmount, ":", " ");
 echo $amount;  // outputs 2000.50
 ```
-
 ### Signal strings
 
 The signal string format contans no decimal point and negative amounts are signaled
 using a letter instead of the final digit. Create Amounts from signal strings
 using the static method **createFromSignalString**.
 
-
 Working with currencies
 -----------------------
-
 The currency subsystem helps prevent bugs where values in different currencies are
 mixed (for example added together). Currency objects subclass `Amount` and works in
 the same way, with the added feature that they know their defined currency.
 
 ```php
-use ledgr\amount\Currency\SEK;
-use ledgr\amount\Currency\EUR;
+use byrokrat\amount\Currency\SEK;
+use byrokrat\amount\Currency\EUR;
 $sek = new SEK('100');
 $added = $sek->add(new EUR('1')); // throws an exception
 $added = $sek->add(new SEK('1')); // works as intended
@@ -143,8 +139,8 @@ Exchanging currencies is supported using `createFromExchange`. Note that you mus
 supply the correct exchange rate.
 
 ```php
-use ledgr\amount\Currency\SEK;
-use ledgr\amount\Currency\EUR;
+use byrokrat\amount\Currency\SEK;
+use byrokrat\amount\Currency\EUR;
 // One euro is exchanged into swedish kronas using the exchange rate 9.27198929
 // resulting in the value of SEK 9.27198929
 $sek = SEK::createFromExchange(new EUR('1'), '9.27198929');
@@ -161,19 +157,17 @@ $money = new EUR('1234567.89');
 // Create a currency formatter with swedish formatting rules
 $formatter = new NumberFormatter('sv_SE', NumberFormatter::CURRENCY);
 
-// Format euros according to swedish standards, output 1 234 567:89 €
+// Format euros according to swedish standards, outputs 1 234 567:89 €
 echo $formatter->formatCurrency($money->getFloat(), $money->getCurrencyCode());
 ```
 
-
 Rounding
 --------
-
 A number of rounding strategies are supported. To implement your own see the
 [Rounder](/src/Rounder.php) interface.
 
 ```php
-namespace ledgr\amount;
+namespace byrokrat\amount;
 $amount = new Amount('1.5');
 echo $amount->roundTo(0, new Rounder\RoundUp);                // 2
 echo $amount->roundTo(0, new Rounder\RoundDown);              // 1
@@ -189,10 +183,8 @@ echo $amount->roundTo(0, new Rounder\RoundHalfToOdd);         // 1
 
 For more info on rounding strategies see [wikipedia](https://en.wikipedia.org/wiki/Rounding).
 
-
 Allocating
 ----------
-
 Allocating is the process of dividing an amount based on ratios in such a way that
 the smallest unit is not divided (every currency has a smallest unit that is
 non-dividable) but instead handed to the receiver next in line.
@@ -201,7 +193,7 @@ The ratios can be seen as (but does not have to be) percentages. A hundred units
 can thous be divided to two receivers as
 
 ```php
-use ledgr\amount\Amount;
+use byrokrat\amount\Amount;
 $money = new Amount('100');
 list($receiverA, $receiverB) = $money->allocate([30, 70]);
 echo $receiverA;    // 30
@@ -212,7 +204,7 @@ The strength of allocating becomes clear when we distribute a value that we are
 not able to divide evenly. In this case the order of the receivers is significant.
 
 ```php
-use ledgr\amount\Amount;
+use byrokrat\amount\Amount;
 $money = new Amount('0.05');
 
 list($receiverA, $receiverB) = $money->allocate([30, 70]);
@@ -227,3 +219,9 @@ echo $receiverB;    // 0.01
 In these examples the undividable unit used is `0.01`. This is the default behaviour.
 Change it either by specifying the `$precision` parameter or by overriding
 `getDisplayPrecision()` in your currency class.
+
+Credits
+-------
+Amount is covered under the [WTFPL](http://www.wtfpl.net/).
+
+@author Hannes Forsgård (hannes.forsgard@fripost.org)

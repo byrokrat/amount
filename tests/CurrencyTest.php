@@ -1,16 +1,16 @@
 <?php
 
-namespace ledgr\amount;
+namespace byrokrat\amount;
 
-use ledgr\amount\Currency\SEK;
-use ledgr\amount\Currency\EUR;
+use byrokrat\amount\Currency\SEK;
+use byrokrat\amount\Currency\EUR;
 
 class CurrencyTest extends \PHPUnit_Framework_TestCase
 {
     public function testCreateFromExchange()
     {
         $sek = SEK::createFromExchange(new EUR('10'), '10');
-        $this->assertInstanceOf('ledgr\amount\Currency\SEK', $sek);
+        $this->assertInstanceOf('byrokrat\amount\Currency\SEK', $sek);
         $this->assertEquals('100', $sek->getAmount());
     }
 
@@ -28,56 +28,56 @@ class CurrencyTest extends \PHPUnit_Framework_TestCase
 
     public function testAddAmountValidation()
     {
-        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
         (new SEK('1'))->add(new EUR('1'));
     }
 
     public function testSubtractAmountValidation()
     {
-        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
         (new SEK('1'))->subtract(new EUR('1'));
     }
 
     public function testCompareToAmountValidation()
     {
-        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
         (new SEK('1'))->compareTo(new EUR('1'));
     }
 
     public function testEqualsAmountValidation()
     {
-        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
         (new SEK('1'))->equals(new EUR('1'));
     }
 
     public function testIsLessThanAmountValidation()
     {
-        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
         (new SEK('1'))->isLessThan(new EUR('1'));
     }
 
     public function testIsLessThanOrEqualsAmountValidation()
     {
-        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
         (new SEK('1'))->isLessThanOrEquals(new EUR('1'));
     }
 
     public function testIsGreaterThanAmountValidation()
     {
-        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
         (new SEK('1'))->isGreaterThan(new EUR('1'));
     }
 
     public function testIsGreaterThanOrEqualsAmountValidation()
     {
-        $this->setExpectedException('ledgr\amount\InvalidArgumentException');
+        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
         (new SEK('1'))->isGreaterThanOrEquals(new EUR('1'));
     }
 
     public function testAdd()
     {
         $this->assertInstanceOf(
-            'ledgr\amount\Currency\SEK',
+            'byrokrat\amount\Currency\SEK',
             (new SEK('1'))->add(new SEK('1'))
         );
     }
@@ -85,7 +85,7 @@ class CurrencyTest extends \PHPUnit_Framework_TestCase
     public function testSubtract()
     {
         $this->assertInstanceOf(
-            'ledgr\amount\Currency\SEK',
+            'byrokrat\amount\Currency\SEK',
             (new SEK('1'))->subtract(new SEK('1'))
         );
     }
