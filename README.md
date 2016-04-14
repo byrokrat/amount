@@ -21,11 +21,9 @@ Features
 
 Installation
 ------------
-Install using [composer](http://getcomposer.org/). Exists as
-[byrokrat/amount](https://packagist.org/packages/byrokrat/amount)
-in the [packagist](https://packagist.org/) repository.
-
-    composer require byrokrat/amount
+```shell
+composer require byrokrat/amount:^1.0
+```
 
 Usage
 -----
