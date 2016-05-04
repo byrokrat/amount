@@ -1,4 +1,4 @@
-# Amount
+# Byrokrat.Amount
 
 [![Packagist Version](https://img.shields.io/packagist/v/byrokrat/amount.svg?style=flat-square)](https://packagist.org/packages/byrokrat/amount)
 [![Build Status](https://img.shields.io/travis/byrokrat/amount/master.svg?style=flat-square)](https://travis-ci.org/byrokrat/amount)
