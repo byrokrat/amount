@@ -177,7 +177,7 @@ echo $sek = SEK::createFromExchange(new EUR('1'), '9.27198929');
 
 Currency objects can easily be formatted using php's built in `NumberFormatter`.
 
-<!-- @expectOutput 1 234 567:89 € -->
+<!-- @expectOutput /1 234 567[:,]89 €/ -->
 ```php
 use byrokrat\amount\Currency\EUR;
 
