@@ -1,6 +1,6 @@
 <?php
 
-namespace byrokrat\banking;
+namespace byrokrat\amount;
 
 use hanneskod\readmetester\PHPUnit\AssertReadme;
 
