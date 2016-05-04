@@ -27,15 +27,23 @@ composer require byrokrat/amount:^1.0
 
 Usage
 -----
+<!-- @expectOutput 1101.00 -->
 ```php
 use byrokrat\amount\Amount;
+
 $amount = new Amount('100.6');
-$amount->isGreaterThan(new Amount('50'));  // true
-$rounded = $amount->roundTo(0);            // round to 0 decimal digits
-echo $rounded;                             // 101
+
+// outputs 1 (true)
+echo $amount->isGreaterThan(new Amount('50'));
+
+// round to 0 decimal digits
+$roundedAmount = $amount->roundTo(0);
+
+// outputs 101.00
+echo $roundedAmount;
 ```
 
-Api
+API
 ---
 [`Amount`](/src/Amount.php) defines the following api:
 
@@ -95,11 +103,17 @@ or [What Every Programmer Should Know About Floating-Point Arithmetic](http://fl
 You can create Amounts from strings formatted with non-standard or locale dependent
 decimal point and grouping characters using the static method **createFromFormat**.
 
+<!-- @expectOutput 2000.50 -->
 ```php
+use byrokrat\amount\Amount;
+
 $formattedAmount = "2 000:50";
+
 $amount = Amount::createFromFormat($formattedAmount, ":", " ");
+
 echo $amount;  // outputs 2000.50
 ```
+
 ### Signal strings
 
 The signal string format contans no decimal point and negative amounts are signaled
@@ -112,12 +126,25 @@ The currency subsystem helps prevent bugs where values in different currencies a
 mixed (for example added together). Currency objects subclass `Amount` and works in
 the same way, with the added feature that they know their defined currency.
 
+<!-- @expectException Exception -->
 ```php
 use byrokrat\amount\Currency\SEK;
 use byrokrat\amount\Currency\EUR;
+
 $sek = new SEK('100');
-$added = $sek->add(new EUR('1')); // throws an exception
-$added = $sek->add(new SEK('1')); // works as intended
+
+// throws an exception
+$sek->add(new EUR('1'));
+```
+
+<!-- @expectOutput 101.00 -->
+```php
+use byrokrat\amount\Currency\SEK;
+
+$sek = new SEK('100');
+
+// works as intended, outputs 101.00
+echo $sek->add(new SEK('1'));
 ```
 
 ### Creating new currencies
@@ -136,19 +163,24 @@ your currency's behaviour.
 Exchanging currencies is supported using `createFromExchange`. Note that you must
 supply the correct exchange rate.
 
+<!-- @expectOutput 9.27 -->
 ```php
 use byrokrat\amount\Currency\SEK;
 use byrokrat\amount\Currency\EUR;
+
 // One euro is exchanged into swedish kronas using the exchange rate 9.27198929
 // resulting in the value of SEK 9.27198929
-$sek = SEK::createFromExchange(new EUR('1'), '9.27198929');
+echo $sek = SEK::createFromExchange(new EUR('1'), '9.27198929');
 ```
 
 ### Formatting currencies
 
 Currency objects can easily be formatted using php's built in `NumberFormatter`.
 
+<!-- @expectOutput 1 234 567:89 € -->
 ```php
+use byrokrat\amount\Currency\EUR;
+
 // Create some amount of euros
 $money = new EUR('1234567.89');
 
@@ -164,19 +196,40 @@ Rounding
 A number of rounding strategies are supported. To implement your own see the
 [Rounder](/src/Rounder.php) interface.
 
+<!-- @expectOutput 2.001.001.002.002.001.001.002.002.001.00 -->
 ```php
 namespace byrokrat\amount;
 $amount = new Amount('1.5');
-echo $amount->roundTo(0, new Rounder\RoundUp);                // 2
-echo $amount->roundTo(0, new Rounder\RoundDown);              // 1
-echo $amount->roundTo(0, new Rounder\RoundTowardsZero);       // 1
-echo $amount->roundTo(0, new Rounder\RoundAwayFromZero);      // 2
-echo $amount->roundTo(0, new Rounder\RoundHalfUp);            // 2
-echo $amount->roundTo(0, new Rounder\RoundHalfDown);          // 1
-echo $amount->roundTo(0, new Rounder\RoundHalfTowardsZero);   // 1
-echo $amount->roundTo(0, new Rounder\RoundHalfAwayFromZero);  // 2
-echo $amount->roundTo(0, new Rounder\RoundHalfToEven);        // 2
-echo $amount->roundTo(0, new Rounder\RoundHalfToOdd);         // 1
+
+// outputs 2
+echo $amount->roundTo(0, new Rounder\RoundUp);
+
+// outputs 1
+echo $amount->roundTo(0, new Rounder\RoundDown);
+
+// outputs 1
+echo $amount->roundTo(0, new Rounder\RoundTowardsZero);
+
+// outputs 2
+echo $amount->roundTo(0, new Rounder\RoundAwayFromZero);
+
+// outputs 2
+echo $amount->roundTo(0, new Rounder\RoundHalfUp);
+
+// outputs 1
+echo $amount->roundTo(0, new Rounder\RoundHalfDown);
+
+// outputs 1
+echo $amount->roundTo(0, new Rounder\RoundHalfTowardsZero);
+
+// outputs 2
+echo $amount->roundTo(0, new Rounder\RoundHalfAwayFromZero);
+
+// outputs 2
+echo $amount->roundTo(0, new Rounder\RoundHalfToEven);
+
+// outputs 1
+echo $amount->roundTo(0, new Rounder\RoundHalfToOdd);
 ```
 
 For more info on rounding strategies see [wikipedia](https://en.wikipedia.org/wiki/Rounding).
@@ -190,28 +243,44 @@ non-dividable) but instead handed to the receiver next in line.
 The ratios can be seen as (but does not have to be) percentages. A hundred units
 can thous be divided to two receivers as
 
+<!-- @expectOutput 30.0070.00 -->
 ```php
 use byrokrat\amount\Amount;
 $money = new Amount('100');
+
 list($receiverA, $receiverB) = $money->allocate([30, 70]);
-echo $receiverA;    // 30
-echo $receiverB;    // 70
+
+// outputs 30
+echo $receiverA;
+
+// outputs 70
+echo $receiverB;
 ```
 
 The strength of allocating becomes clear when we distribute a value that we are
 not able to divide evenly. In this case the order of the receivers is significant.
 
+<!-- @expectOutput 0.020.030.040.01 -->
 ```php
 use byrokrat\amount\Amount;
+
 $money = new Amount('0.05');
 
 list($receiverA, $receiverB) = $money->allocate([30, 70]);
-echo $receiverA;    // 0.03
-echo $receiverB;    // 0.02
+
+// outputs 0.03
+echo $receiverA;
+
+// outputs 0.02
+echo $receiverB;
 
 list($receiverA, $receiverB) = $money->allocate([70, 30]);
-echo $receiverA;    // 0.04
-echo $receiverB;    // 0.01
+
+// outputs 0.04
+echo $receiverA;
+
+// outputs 0.01
+echo $receiverB;
 ```
 
 In these examples the undividable unit used is `0.01`. This is the default behaviour.
