@@ -10,7 +10,7 @@ class RoundHalfDownTest extends \PHPUnit_Framework_TestCase
         $precision = 0;
         $expected = 'foobar';
 
-        $toolkit = $this->createMock('byrokrat\amount\Rounder\Toolkit');
+        $toolkit = $this->getMockBuilder('byrokrat\amount\Rounder\Toolkit')->getMock();
 
         $toolkit->expects($this->once())
             ->method('roundToNearest')
