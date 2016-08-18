@@ -10,7 +10,7 @@ class RoundHalfTowardsZeroTest extends \PHPUnit_Framework_TestCase
         $precision = 0;
         $expected = 'foobar';
 
-        $toolkit = $this->getMock('byrokrat\amount\Rounder\Toolkit');
+        $toolkit = $this->createMock('byrokrat\amount\Rounder\Toolkit');
 
         $toolkit->expects($this->once())
             ->method('roundToNearest')
