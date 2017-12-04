@@ -5,7 +5,7 @@ namespace byrokrat\amount;
 use byrokrat\amount\Currency\SEK;
 use byrokrat\amount\Currency\EUR;
 
-class CurrencyTest extends \PHPUnit_Framework_TestCase
+class CurrencyTest extends \PHPUnit\Framework\TestCase
 {
     public function testCreateFromExchange()
     {
@@ -28,49 +28,49 @@ class CurrencyTest extends \PHPUnit_Framework_TestCase
 
     public function testAddAmountValidation()
     {
-        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::CLASS);
         (new SEK('1'))->add(new EUR('1'));
     }
 
     public function testSubtractAmountValidation()
     {
-        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::CLASS);
         (new SEK('1'))->subtract(new EUR('1'));
     }
 
     public function testCompareToAmountValidation()
     {
-        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::CLASS);
         (new SEK('1'))->compareTo(new EUR('1'));
     }
 
     public function testEqualsAmountValidation()
     {
-        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::CLASS);
         (new SEK('1'))->equals(new EUR('1'));
     }
 
     public function testIsLessThanAmountValidation()
     {
-        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::CLASS);
         (new SEK('1'))->isLessThan(new EUR('1'));
     }
 
     public function testIsLessThanOrEqualsAmountValidation()
     {
-        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::CLASS);
         (new SEK('1'))->isLessThanOrEquals(new EUR('1'));
     }
 
     public function testIsGreaterThanAmountValidation()
     {
-        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::CLASS);
         (new SEK('1'))->isGreaterThan(new EUR('1'));
     }
 
     public function testIsGreaterThanOrEqualsAmountValidation()
     {
-        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::CLASS);
         (new SEK('1'))->isGreaterThanOrEquals(new EUR('1'));
     }
 

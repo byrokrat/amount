@@ -2,7 +2,7 @@
 
 namespace byrokrat\amount\Rounder;
 
-class RoundUpTest extends \PHPUnit_Framework_TestCase
+class RoundUpTest extends \PHPUnit\Framework\TestCase
 {
     public function testRound()
     {

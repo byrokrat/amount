@@ -2,7 +2,7 @@
 
 namespace byrokrat\amount;
 
-class AmountTest extends \PHPUnit_Framework_TestCase
+class AmountTest extends \PHPUnit\Framework\TestCase
 {
     public function invalidStringsProvider()
     {
@@ -18,7 +18,7 @@ class AmountTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidStrings($argument)
     {
-        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::CLASS);
         new Amount($argument);
     }
 
@@ -86,7 +86,7 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 
     public function testCastToStringArgumentException()
     {
-        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::CLASS);
         (new Amount('1'))->divideBy(null);
     }
 
@@ -195,7 +195,7 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 
     public function testInvalidNumber()
     {
-        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::CLASS);
         Amount::createFromNumber('string');
     }
 
@@ -257,7 +257,7 @@ class AmountTest extends \PHPUnit_Framework_TestCase
 
     public function testInvalidSignalString()
     {
-        $this->setExpectedException('byrokrat\amount\InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::CLASS);
         Amount::createFromSignalString('Q123Q'); // not a valid signal string
     }
 

@@ -2,7 +2,7 @@
 
 namespace byrokrat\amount\Rounder;
 
-class ToolkitTest extends \PHPUnit_Framework_TestCase
+class ToolkitTest extends \PHPUnit\Framework\TestCase
 {
     public function isPositiveProvider()
     {

@@ -2,7 +2,7 @@
 
 namespace byrokrat\amount\Rounder;
 
-class RoundTowardsZeroTest extends \PHPUnit_Framework_TestCase
+class RoundTowardsZeroTest extends \PHPUnit\Framework\TestCase
 {
     public function testRound()
     {
