@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace byrokrat\amount\Currency;
 
 /**
@@ -7,13 +9,4 @@ namespace byrokrat\amount\Currency;
  */
 class EUR extends \byrokrat\amount\Currency
 {
-    /**
-     * Get ISO-4217 currency name
-     *
-     * @return string
-     */
-    public function getCurrencyCode()
-    {
-        return 'EUR';
-    }
 }

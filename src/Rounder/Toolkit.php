@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace byrokrat\amount\Rounder;
 
 /**
@@ -9,33 +11,24 @@ class Toolkit
 {
     /**
      * Check if value is positive
-     *
-     * @param  string $value
-     * @return bool
      */
-    public function isPositive($value)
+    public function isPositive(string $value): bool
     {
-        return 1 == bccomp($value, 0, $this->parsePrecision($value));
+        return 1 == bccomp($value, '0', $this->parsePrecision($value));
     }
 
     /**
      * Check if value is even
-     *
-     * @param  string $value
-     * @return bool
      */
-    public function isEven($value)
+    public function isEven(string $value): bool
     {
         return 0 == bcmod($value, '2');
     }
 
     /**
      * Extract the precision used in $value
-     *
-     * @param  string  $value
-     * @return integer
      */
-    public function parsePrecision($value)
+    public function parsePrecision(string $value): int
     {
         if (strpos($value, '.') === false) {
             return 0;
@@ -48,11 +41,8 @@ class Toolkit
 
     /**
      * Get one unit in the scale of $precision
-     *
-     * @param  integer $precision
-     * @return string
      */
-    public function getOneUnit($precision)
+    public function getOneUnit(int $precision): string
     {
         return bcdiv(
             '1',
@@ -63,24 +53,16 @@ class Toolkit
 
     /**
      * Round value towards zero
-     *
-     * @param  string  $value
-     * @param  integer $precision
-     * @return string
      */
-    public function roundTowardsZero($value, $precision)
+    public function roundTowardsZero(string $value, int $precision): string
     {
         return bcadd($value, '0', $precision);
     }
 
     /**
      * Round value away from zero
-     *
-     * @param  string  $value
-     * @param  integer $precision
-     * @return string
      */
-    public function roundAwayFromZero($value, $precision)
+    public function roundAwayFromZero(string $value, int $precision): string
     {
         if ($this->parsePrecision($value) <= $precision) {
             return $value;
@@ -95,12 +77,8 @@ class Toolkit
 
     /**
      * Round up value
-     *
-     * @param  string  $value
-     * @param  integer $precision
-     * @return string
      */
-    public function roundUp($value, $precision)
+    public function roundUp(string $value, int $precision): string
     {
         if ($this->parsePrecision($value) <= $precision) {
             return $value;
@@ -119,12 +97,8 @@ class Toolkit
 
     /**
      * Round down value
-     *
-     * @param  string  $value
-     * @param  integer $precision
-     * @return string
      */
-    public function roundDown($value, $precision)
+    public function roundDown(string $value, int $precision): string
     {
         if ($this->parsePrecision($value) <= $precision) {
             return $value;
@@ -143,37 +117,28 @@ class Toolkit
 
     /**
      * Get tiebreak value for round to nearest strategies
-     *
-     * @param  string  $value
-     * @param  integer $precision
-     * @return string
      */
-    public function getTiebreak($value, $precision)
+    public function getTiebreak(string $value, int $precision): string
     {
         return $this->roundTowardsZero($value, $precision) . ($precision > 0 ? '5' : '.5');
     }
 
     /**
      * Round to nearest using callback for breaking ties
-     *
-     * @param  string   $value
-     * @param  integer  $precision
-     * @param  callable $tiebreakCallback
-     * @return string
      */
-    public function roundToNearest($value, $precision, callable $tiebreakCallback)
+    public function roundToNearest(string $value, int $precision, callable $tiebreakCallback): string
     {
         if ($this->parsePrecision($value) <= $precision) {
             return $value;
         }
 
-        switch (bccomp($value, $this->getTiebreak($value, $precision), $precision+1)) {
+        switch (bccomp($value, $this->getTiebreak($value, $precision), $precision + 1)) {
             case 1:
                 return $this->roundUp($value, $precision);
             case -1:
                 return $this->roundDown($value, $precision);
+            default:
+                return $tiebreakCallback($value, $precision);
         }
-
-        return $tiebreakCallback($value, $precision);
     }
 }

@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace byrokrat\amount\Rounder;
 
 class ToolkitTest extends \PHPUnit\Framework\TestCase
 {
     public function isPositiveProvider()
     {
-        return array(
-            array('-1', false),
-            array('0', false),
-            array('0.0000000001', true),
-        );
+        return [
+            ['-1', false],
+            ['0', false],
+            ['0.0000000001', true],
+        ];
     }
 
     /**
@@ -26,13 +28,13 @@ class ToolkitTest extends \PHPUnit\Framework\TestCase
 
     public function isEvenProvider()
     {
-        return array(
-            array('-2', true),
-            array('-1', false),
-            array('0', true),
-            array('1', false),
-            array('2', true),
-        );
+        return [
+            ['-2', true],
+            ['-1', false],
+            ['0', true],
+            ['1', false],
+            ['2', true],
+        ];
     }
 
     /**
@@ -48,12 +50,12 @@ class ToolkitTest extends \PHPUnit\Framework\TestCase
 
     public function parsePrecisionProvider()
     {
-        return array(
-            array('1', 0),
-            array('1.1', 1),
-            array('1.1000', 1),
-            array('0.10001', 5),
-        );
+        return [
+            ['1', 0],
+            ['1.1', 1],
+            ['1.1000', 1],
+            ['0.10001', 5],
+        ];
     }
 
     /**
@@ -69,13 +71,13 @@ class ToolkitTest extends \PHPUnit\Framework\TestCase
 
     public function oneUnitProvider()
     {
-        return array(
-            array(0, '1'),
-            array(1, '0.1'),
-            array(2, '0.01'),
-            array(3, '0.001'),
-            array(4, '0.0001'),
-        );
+        return [
+            [0, '1'],
+            [1, '0.1'],
+            [2, '0.01'],
+            [3, '0.001'],
+            [4, '0.0001'],
+        ];
     }
 
     /**
@@ -91,28 +93,28 @@ class ToolkitTest extends \PHPUnit\Framework\TestCase
 
     public function towardsZeroProvider()
     {
-        return array(
-            array('0', 0, '0'),
-            array('1', 0, '1'),
-            array('0.1', 0, '0'),
-            array('0.5', 0, '0'),
-            array('0.9', 0, '0'),
-            array('0.01', 0, '0'),
-            array('0.05', 0, '0'),
-            array('0.09', 0, '0'),
-            array('0.01', 1, '0.0'),
-            array('0.05', 1, '0.0'),
-            array('0.09', 1, '0.0'),
-            array('-0.1', 0, '-0'),
-            array('-0.5', 0, '-0'),
-            array('-0.9', 0, '-0'),
-            array('-0.01', 0, '-0'),
-            array('-0.05', 0, '-0'),
-            array('-0.09', 0, '-0'),
-            array('-0.01', 1, '-0.0'),
-            array('-0.05', 1, '-0.0'),
-            array('-0.09', 1, '-0.0'),
-        );
+        return [
+            ['0', 0, '0'],
+            ['1', 0, '1'],
+            ['0.1', 0, '0'],
+            ['0.5', 0, '0'],
+            ['0.9', 0, '0'],
+            ['0.01', 0, '0'],
+            ['0.05', 0, '0'],
+            ['0.09', 0, '0'],
+            ['0.01', 1, '0.0'],
+            ['0.05', 1, '0.0'],
+            ['0.09', 1, '0.0'],
+            ['-0.1', 0, '-0'],
+            ['-0.5', 0, '-0'],
+            ['-0.9', 0, '-0'],
+            ['-0.01', 0, '-0'],
+            ['-0.05', 0, '-0'],
+            ['-0.09', 0, '-0'],
+            ['-0.01', 1, '-0.0'],
+            ['-0.05', 1, '-0.0'],
+            ['-0.09', 1, '-0.0'],
+        ];
     }
 
     /**
@@ -128,28 +130,28 @@ class ToolkitTest extends \PHPUnit\Framework\TestCase
 
     public function awayFromZeroProvider()
     {
-        return array(
-            array('0', 0, '0'),
-            array('1', 0, '1'),
-            array('0.1', 0, '1'),
-            array('0.5', 0, '1'),
-            array('0.9', 0, '1'),
-            array('0.01', 0, '1'),
-            array('0.05', 0, '1'),
-            array('0.09', 0, '1'),
-            array('0.01', 1, '0.1'),
-            array('0.05', 1, '0.1'),
-            array('0.09', 1, '0.1'),
-            array('-0.1', 0, '-1'),
-            array('-0.5', 0, '-1'),
-            array('-0.9', 0, '-1'),
-            array('-0.01', 0, '-1'),
-            array('-0.05', 0, '-1'),
-            array('-0.09', 0, '-1'),
-            array('-0.11', 1, '-0.2'),
-            array('-0.15', 1, '-0.2'),
-            array('-0.19', 1, '-0.2'),
-        );
+        return [
+            ['0', 0, '0'],
+            ['1', 0, '1'],
+            ['0.1', 0, '1'],
+            ['0.5', 0, '1'],
+            ['0.9', 0, '1'],
+            ['0.01', 0, '1'],
+            ['0.05', 0, '1'],
+            ['0.09', 0, '1'],
+            ['0.01', 1, '0.1'],
+            ['0.05', 1, '0.1'],
+            ['0.09', 1, '0.1'],
+            ['-0.1', 0, '-1'],
+            ['-0.5', 0, '-1'],
+            ['-0.9', 0, '-1'],
+            ['-0.01', 0, '-1'],
+            ['-0.05', 0, '-1'],
+            ['-0.09', 0, '-1'],
+            ['-0.11', 1, '-0.2'],
+            ['-0.15', 1, '-0.2'],
+            ['-0.19', 1, '-0.2'],
+        ];
     }
 
     /**
@@ -165,28 +167,28 @@ class ToolkitTest extends \PHPUnit\Framework\TestCase
 
     public function roundUpProvider()
     {
-        return array(
-            array('0', 0, '0'),
-            array('1', 0, '1'),
-            array('0.1', 0, '1'),
-            array('0.5', 0, '1'),
-            array('0.9', 0, '1'),
-            array('0.01', 0, '1'),
-            array('0.05', 0, '1'),
-            array('0.09', 0, '1'),
-            array('0.01', 1, '0.1'),
-            array('0.05', 1, '0.1'),
-            array('0.09', 1, '0.1'),
-            array('-0.1', 0, '-0'),
-            array('-0.5', 0, '-0'),
-            array('-0.9', 0, '-0'),
-            array('-0.01', 0, '-0'),
-            array('-0.05', 0, '-0'),
-            array('-0.09', 0, '-0'),
-            array('-0.11', 1, '-0.1'),
-            array('-0.15', 1, '-0.1'),
-            array('-0.19', 1, '-0.1'),
-        );
+        return [
+            ['0', 0, '0'],
+            ['1', 0, '1'],
+            ['0.1', 0, '1'],
+            ['0.5', 0, '1'],
+            ['0.9', 0, '1'],
+            ['0.01', 0, '1'],
+            ['0.05', 0, '1'],
+            ['0.09', 0, '1'],
+            ['0.01', 1, '0.1'],
+            ['0.05', 1, '0.1'],
+            ['0.09', 1, '0.1'],
+            ['-0.1', 0, '-0'],
+            ['-0.5', 0, '-0'],
+            ['-0.9', 0, '-0'],
+            ['-0.01', 0, '-0'],
+            ['-0.05', 0, '-0'],
+            ['-0.09', 0, '-0'],
+            ['-0.11', 1, '-0.1'],
+            ['-0.15', 1, '-0.1'],
+            ['-0.19', 1, '-0.1'],
+        ];
     }
 
     /**
@@ -202,28 +204,28 @@ class ToolkitTest extends \PHPUnit\Framework\TestCase
 
     public function roundDownProvider()
     {
-        return array(
-            array('0', 0, '0'),
-            array('1', 0, '1'),
-            array('0.1', 0, '0'),
-            array('0.5', 0, '0'),
-            array('0.9', 0, '0'),
-            array('0.11', 0, '0'),
-            array('0.15', 0, '0'),
-            array('0.19', 0, '0'),
-            array('0.11', 1, '0.1'),
-            array('0.15', 1, '0.1'),
-            array('0.19', 1, '0.1'),
-            array('-0.1', 0, '-1'),
-            array('-0.5', 0, '-1'),
-            array('-0.9', 0, '-1'),
-            array('-0.01', 0, '-1'),
-            array('-0.05', 0, '-1'),
-            array('-0.09', 0, '-1'),
-            array('-0.11', 1, '-0.2'),
-            array('-0.15', 1, '-0.2'),
-            array('-0.19', 1, '-0.2'),
-        );
+        return [
+            ['0', 0, '0'],
+            ['1', 0, '1'],
+            ['0.1', 0, '0'],
+            ['0.5', 0, '0'],
+            ['0.9', 0, '0'],
+            ['0.11', 0, '0'],
+            ['0.15', 0, '0'],
+            ['0.19', 0, '0'],
+            ['0.11', 1, '0.1'],
+            ['0.15', 1, '0.1'],
+            ['0.19', 1, '0.1'],
+            ['-0.1', 0, '-1'],
+            ['-0.5', 0, '-1'],
+            ['-0.9', 0, '-1'],
+            ['-0.01', 0, '-1'],
+            ['-0.05', 0, '-1'],
+            ['-0.09', 0, '-1'],
+            ['-0.11', 1, '-0.2'],
+            ['-0.15', 1, '-0.2'],
+            ['-0.19', 1, '-0.2'],
+        ];
     }
 
     /**
@@ -239,12 +241,12 @@ class ToolkitTest extends \PHPUnit\Framework\TestCase
 
     public function getTiebreakProvider()
     {
-        return array(
-            array('1.238', 2, '1.235'),
-            array('1.238', 1, '1.25'),
-            array('1.238', 0, '1.5'),
-            array('-1.238', 2, '-1.235'),
-        );
+        return [
+            ['1.238', 2, '1.235'],
+            ['1.238', 1, '1.25'],
+            ['1.238', 0, '1.5'],
+            ['-1.238', 2, '-1.235'],
+        ];
     }
 
     /**
@@ -260,16 +262,16 @@ class ToolkitTest extends \PHPUnit\Framework\TestCase
 
     public function roundToNearestProvider()
     {
-        return array(
-            array('0', 0, '0'),
-            array('1', 0, '1'),
-            array('1.1', 0, '1'),
-            array('1.6', 0, '2'),
-            array('1.5', 0, 'tiebreak'),
-            array('-1.1', 0, '-1'),
-            array('-1.6', 0, '-2'),
-            array('-1.5', 0, 'tiebreak'),
-        );
+        return [
+            ['0', 0, '0'],
+            ['1', 0, '1'],
+            ['1.1', 0, '1'],
+            ['1.6', 0, '2'],
+            ['1.5', 0, 'tiebreak'],
+            ['-1.1', 0, '-1'],
+            ['-1.6', 0, '-2'],
+            ['-1.5', 0, 'tiebreak'],
+        ];
     }
 
     /**

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace byrokrat\amount;
 
 class AmountTest extends \PHPUnit\Framework\TestCase
@@ -7,7 +9,6 @@ class AmountTest extends \PHPUnit\Framework\TestCase
     public function invalidStringsProvider()
     {
         return [
-            [123],               // not a string
             ['alpha'],           // not numerical
             [(string)0.0000001], // converts to something like 1.0E-7
         ];

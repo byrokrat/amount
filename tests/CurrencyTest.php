@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace byrokrat\amount;
 
 use byrokrat\amount\Currency\SEK;

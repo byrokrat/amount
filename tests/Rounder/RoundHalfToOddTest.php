@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace byrokrat\amount\Rounder;
 
 class RoundHalfToOddTest extends \PHPUnit\Framework\TestCase
@@ -10,7 +12,7 @@ class RoundHalfToOddTest extends \PHPUnit\Framework\TestCase
         $precision = 0;
         $expected = 'foobar';
 
-        $toolkit = $this->getMockBuilder('byrokrat\amount\Rounder\Toolkit')->getMock();
+        $toolkit = $this->getMockBuilder(Toolkit::CLASS)->getMock();
 
         $toolkit->expects($this->once())
             ->method('roundToNearest')
@@ -25,12 +27,12 @@ class RoundHalfToOddTest extends \PHPUnit\Framework\TestCase
 
     public function breakTieProvider()
     {
-        return array(
-            array('1.5', 0, '1'),
-            array('-1.5', 0, '-1'),
-            array('2.5', 0, '3'),
-            array('-2.5', 0, '-3'),
-        );
+        return [
+            ['1.5', 0, '1'],
+            ['-1.5', 0, '-1'],
+            ['2.5', 0, '3'],
+            ['-2.5', 0, '-3'],
+        ];
     }
 
     /**

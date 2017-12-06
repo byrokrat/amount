@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace byrokrat\amount\Rounder;
 
 class RoundAwayFromZeroTest extends \PHPUnit\Framework\TestCase
@@ -10,7 +12,7 @@ class RoundAwayFromZeroTest extends \PHPUnit\Framework\TestCase
         $precision = 0;
         $expected = 'foobar';
 
-        $toolkit = $this->getMockBuilder('byrokrat\amount\Rounder\Toolkit')->getMock();
+        $toolkit = $this->getMockBuilder(Toolkit::CLASS)->getMock();
 
         $toolkit->expects($this->once())
             ->method('roundAwayFromZero')

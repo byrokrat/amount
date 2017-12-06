@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace byrokrat\amount\Rounder;
 
 /**
@@ -9,14 +11,7 @@ class RoundDown implements \byrokrat\amount\Rounder
 {
     use ToolkitConsumer;
 
-    /**
-     * Round $value to $precision number of decimal digits
-     *
-     * @param  string  $value
-     * @param  integer $precision
-     * @return string
-     */
-    public function round($value, $precision)
+    public function round(string $value, int $precision): string
     {
         return $this->toolkit->roundDown($value, $precision);
     }

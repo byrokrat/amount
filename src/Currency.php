@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace byrokrat\amount;
 
 /**
@@ -13,141 +15,75 @@ abstract class Currency extends Amount
     /**
      * Create new currency object by exchange from foreign currency
      *
-     * @param  Currency $amount The amount to exchange
-     * @param  mixed    $rate   The exchange rate used
-     * @return Currency
+     * @param  Currency                $amount The amount to exchange
+     * @param  int|float|string|Amount $rate   The exchange rate used
      */
-    public static function createFromExchange(Currency $amount, $rate)
+    public static function createFromExchange(Currency $amount, $rate): Currency
     {
-        return new static(
-            $amount->multiplyWith($rate)->getAmount()
-        );
+        return new static($amount->multiplyWith($rate)->getAmount());
     }
 
     /**
      * Get ISO-4217 currency name
-     *
-     * @return string
      */
-    abstract public function getCurrencyCode();
-
-    /**
-     * Get new Amount with the value of $amount added to instance
-     *
-     * @param  Amount  $amount
-     * @param  integer $precision
-     * @return Amount
-     */
-    public function add(Amount $amount, $precision = -1)
+    public function getCurrencyCode(): string
     {
-        $this->validateCurrency($amount);
-        return parent::add($amount, $precision);
+        return (new \ReflectionClass($this))->getShortName();
     }
 
-    /**
-     * Get new Amount with the value of $amount subtracted from instance
-     *
-     * @param  Amount  $amount
-     * @param  integer $precision
-     * @return Amount
-     */
-    public function subtract(Amount $amount, $precision = -1)
+    public function add(Amount $amount, int $precision = -1): Amount
     {
-        $this->validateCurrency($amount);
-        return parent::subtract($amount, $precision);
+        return parent::add($this->validateCurrency($amount), $precision);
     }
 
-    /**
-     * Compare to amount
-     *
-     * @param  Amount  $amount
-     * @param  integer $precision
-     * @return integer 0 if instance and $amount are equal, 1 if instance is larger, -1 otherwise.
-     */
-    public function compareTo(Amount $amount, $precision = -1)
+    public function subtract(Amount $amount, int $precision = -1): Amount
     {
-        $this->validateCurrency($amount);
-        return parent::compareTo($amount, $precision);
+        return parent::subtract($this->validateCurrency($amount), $precision);
     }
 
-    /**
-     * Check if instance equals amount
-     *
-     * @param  Amount  $amount
-     * @param  integer $precision
-     * @return boolean
-     */
-    public function equals(Amount $amount, $precision = -1)
+    public function compareTo(Amount $amount, int $precision = -1): int
     {
-        $this->validateCurrency($amount);
-        return parent::equals($amount, $precision);
+        return parent::compareTo($this->validateCurrency($amount), $precision);
     }
 
-    /**
-     * Check if instance is less than amount
-     *
-     * @param  Amount  $amount
-     * @param  integer $precision
-     * @return boolean
-     */
-    public function isLessThan(Amount $amount, $precision = -1)
+    public function equals(Amount $amount, int $precision = -1): bool
     {
-        $this->validateCurrency($amount);
-        return parent::isLessThan($amount, $precision);
+        return parent::equals($this->validateCurrency($amount), $precision);
     }
 
-    /**
-     * Check if instance is less than or equals amount
-     *
-     * @param  Amount  $amount
-     * @param  integer $precision
-     * @return boolean
-     */
-    public function isLessThanOrEquals(Amount $amount, $precision = -1)
+    public function isLessThan(Amount $amount, int $precision = -1): bool
     {
-        $this->validateCurrency($amount);
-        return parent::isLessThanOrEquals($amount, $precision);
+        return parent::isLessThan($this->validateCurrency($amount), $precision);
     }
 
-    /**
-     * Check if instance is greater than amount
-     *
-     * @param  Amount  $amount
-     * @param  integer $precision
-     * @return boolean
-     */
-    public function isGreaterThan(Amount $amount, $precision = -1)
+    public function isLessThanOrEquals(Amount $amount, int $precision = -1): bool
     {
-        $this->validateCurrency($amount);
-        return parent::isGreaterThan($amount, $precision);
+        return parent::isLessThanOrEquals($this->validateCurrency($amount), $precision);
     }
 
-    /**
-     * Check if instance is greater than or equals amount
-     *
-     * @param  Amount  $amount
-     * @param  integer $precision
-     * @return boolean
-     */
-    public function isGreaterThanOrEquals(Amount $amount, $precision = -1)
+    public function isGreaterThan(Amount $amount, int $precision = -1): bool
     {
-        $this->validateCurrency($amount);
-        return parent::isGreaterThanOrEquals($amount, $precision);
+        return parent::isGreaterThan($this->validateCurrency($amount), $precision);
+    }
+
+    public function isGreaterThanOrEquals(Amount $amount, int $precision = -1): bool
+    {
+        return parent::isGreaterThanOrEquals($this->validateCurrency($amount), $precision);
     }
 
     /**
      * Validate that amount is in the expected currency
      *
-     * @param  Amount $amount
-     * @return void
      * @throws InvalidArgumentException If amount is in an unexpected currency
      */
-    protected function validateCurrency(Amount $amount)
+    protected function validateCurrency(Amount $amount): Amount
     {
         if (!$amount instanceof static) {
             throw new InvalidArgumentException(
-                "Object of type " . get_class($this) . " expected, found " . get_class($amount)
+                "Currency " . get_class($this) . " expected, found " . get_class($amount)
             );
         }
+
+        return $amount;
     }
 }

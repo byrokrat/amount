@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace byrokrat\amount\Rounder;
 
 class RoundHalfToEvenTest extends \PHPUnit\Framework\TestCase
@@ -10,7 +12,7 @@ class RoundHalfToEvenTest extends \PHPUnit\Framework\TestCase
         $precision = 0;
         $expected = 'foobar';
 
-        $toolkit = $this->getMockBuilder('byrokrat\amount\Rounder\Toolkit')->getMock();
+        $toolkit = $this->getMockBuilder(Toolkit::CLASS)->getMock();
 
         $toolkit->expects($this->once())
             ->method('roundToNearest')
@@ -25,12 +27,12 @@ class RoundHalfToEvenTest extends \PHPUnit\Framework\TestCase
 
     public function breakTieProvider()
     {
-        return array(
-            array('1.5', 0, '2'),
-            array('-1.5', 0, '-2'),
-            array('2.5', 0, '2'),
-            array('-2.5', 0, '-2'),
-        );
+        return [
+            ['1.5', 0, '2'],
+            ['-1.5', 0, '-2'],
+            ['2.5', 0, '2'],
+            ['-2.5', 0, '-2'],
+        ];
     }
 
     /**
