@@ -4,7 +4,7 @@
     "keywords": ["monetary amount", "economics", "money", "currency"],
     "homepage": "https://github.com/byrokrat/amount",
     "type": "library",
-    "license": "WTFPL",
+    "license": "Unlicense",
     "authors": [
         {
             "name": "Hannes Forsgård",

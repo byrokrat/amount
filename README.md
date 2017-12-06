@@ -1,4 +1,4 @@
-# Byrokrat.Amount
+# Amount
 
 [![Packagist Version](https://img.shields.io/packagist/v/byrokrat/amount.svg?style=flat-square)](https://packagist.org/packages/byrokrat/amount)
 [![Build Status](https://img.shields.io/travis/byrokrat/amount/master.svg?style=flat-square)](https://travis-ci.org/byrokrat/amount)
@@ -286,9 +286,3 @@ echo $receiverB;
 In these examples the undividable unit used is `0.01`. This is the default behaviour.
 Change it either by specifying the `$precision` parameter or by overriding
 `getDisplayPrecision()` in your currency class.
-
-Credits
--------
-Amount is covered under the [WTFPL](http://www.wtfpl.net/).
-
-@author Hannes Forsgård (hannes.forsgard@fripost.org)
