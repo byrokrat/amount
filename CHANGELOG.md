@@ -5,13 +5,20 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Nothing...
+
+## [2.0.0] - 2017-12-06
+
+### Changed
 - Require php 7 and strict typing.
-- Add ISO 4217 currencies.
+
+### Added
+- Added comprehensive set of `ISO 4217` currencies.
 
 ## [1.0.2] - 2016-08-18
 
 ### Added
-- Add a .gitattributes to prevent tests and unneeded files from being included in composer installs.
+- Add a `.gitattributes` to prevent unneeded files from being included in composer installs.
 
 ## [1.0.1] - 2016-05-04
 
