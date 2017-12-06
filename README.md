@@ -14,6 +14,7 @@ Features
  * Using the [bcmath](http://php.net/manual/en/book.bc.php) extension for
    arbitrary floating point arithmetic precision.
  * [Currency](#working-with-currencies) support to prevent mixing currencies.
+ * Out of the box support for ISO 4217 currencies.
  * Simple interface for [defining new currencies](#creating-new-currencies).
  * Support for multiple [rounding](#rounding) strategies.
  * Support for [allocating](#allocating) amounts based on ratios.
@@ -22,7 +23,7 @@ Features
 Installation
 ------------
 ```shell
-composer require byrokrat/amount:^1.0
+composer require byrokrat/amount:^2
 ```
 
 Usage
@@ -147,16 +148,21 @@ $sek = new SEK('100');
 echo $sek->add(new SEK('1'));
 ```
 
+### ISO 4217
+
+A comprehensive set of ISO 4217 currencies are bundled in the
+[`byrokrat\amount\Currency`](/src/Currency/) namespace.
+
+Please note that the Turkish Lira with the ISO code `TRY` is represented as
+`_TRY` as try is a reserved keyword.
+
 ### Creating new currencies
 
-Only the [`SEK`](/src/Currency/SEK.php) and [`EUR`](/src/Currency/EUR.php) currencies
-are shipped with this package. Creating new currencies however is straight forward.
-Simply subclass the [`Currency`](/src/Currency.php) class and define `getCurrencyCode()`.
-See the [`currency subpackage`](/src/Currency/) for reference.
+Creating new currencies however is straight forward. Simply subclass the
+[`Currency`](/src/Currency.php) class and define `getCurrencyCode()`.
 
 Additionaly you may override `getDisplayPrecision()`, `getInternalPrecision()` and
-`getDefaultRounder()` inherited from [`Amount`](/src/Amount.php) to further define
-your currency's behaviour.
+`getDefaultRounder()` to further define your currency's behaviour.
 
 ### Exchanging
 

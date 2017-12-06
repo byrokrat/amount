@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 - Require php 7 and strict typing.
+- Add ISO 4217 currencies.
 
 ## [1.0.2] - 2016-08-18
 

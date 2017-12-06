@@ -26,10 +26,7 @@ abstract class Currency extends Amount
     /**
      * Get ISO-4217 currency name
      */
-    public function getCurrencyCode(): string
-    {
-        return (new \ReflectionClass($this))->getShortName();
-    }
+    abstract public function getCurrencyCode(): string;
 
     public function add(Amount $amount, int $precision = -1): Amount
     {
