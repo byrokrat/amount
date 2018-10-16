@@ -4,7 +4,6 @@
 [![Build Status](https://img.shields.io/travis/byrokrat/amount/master.svg?style=flat-square)](https://travis-ci.org/byrokrat/amount)
 [![Quality Score](https://img.shields.io/scrutinizer/g/byrokrat/amount.svg?style=flat-square)](https://scrutinizer-ci.com/g/byrokrat/amount)
 [![Scrutinizer Coverage](https://img.shields.io/scrutinizer/coverage/g/byrokrat/amount.svg?style=flat-square)](https://scrutinizer-ci.com/g/byrokrat/amount/?branch=master)
-[![Dependency Status](https://img.shields.io/gemnasium/byrokrat/amount.svg?style=flat-square)](https://gemnasium.com/byrokrat/amount)
 
 Value objects for monetary amounts.
 
