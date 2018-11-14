@@ -283,11 +283,10 @@ class AmountTest extends \PHPUnit\Framework\TestCase
     /**
      * @dataProvider allocateProvider
      */
-    public function testAllocate(Amount $amount, $precision, array $ratios, array $result)
+    public function testAllocate(Amount $amount, $precision, array $ratios, array $expectedResult)
     {
-        $this->assertEquals(
-            $result,
-            $amount->allocate($ratios, $precision)
-        );
+        foreach ($amount->allocate($ratios, $precision) as $key => $allocatedAmount) {
+            $this->assertTrue($allocatedAmount->equals($expectedResult[$key]));
+        }
     }
 }
