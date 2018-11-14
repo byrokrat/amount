@@ -11,9 +11,11 @@ class CurrencyTest extends \PHPUnit\Framework\TestCase
 {
     public function testCreateFromExchange()
     {
-        $sek = SEK::createFromExchange(new EUR('10'), '10');
-        $this->assertInstanceOf('byrokrat\amount\Currency\SEK', $sek);
-        $this->assertEquals('100', $sek->getAmount());
+        $this->assertTrue(
+            (new SEK('100'))->equals(
+                SEK::createFromExchange(new EUR('10'), '10')
+            )
+        );
     }
 
     public function testGetCurrencyCode()
