@@ -250,14 +250,20 @@ class Amount
     /**
      * Get new Amount with the value of instance divided by $amount
      *
-     * @param int|float|string|Amount $amount
+     * @param int|float|string|Amount $divisor
      */
-    public function divideBy($amount, int $precision = -1): Amount
+    public function divideBy($divisor, int $precision = -1): Amount
     {
+        $strDivisor = $this->castToString($divisor);
+
+        if (!bccomp($strDivisor, '0')) {
+            throw new DivisionByZeroException();
+        }
+
         return new static(
             bcdiv(
                 $this->getAmount(),
-                $this->castToString($amount),
+                $strDivisor,
                 $precision >= 0 ? $precision : $this->getInternalPrecision()
             )
         );

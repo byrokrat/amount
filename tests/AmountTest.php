@@ -85,6 +85,12 @@ class AmountTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('10', $amount10->getString(0));
     }
 
+    public function testDivisionByZero()
+    {
+        $this->expectException(DivisionByZeroException::CLASS);
+        (new Amount('100'))->divideBy('0');
+    }
+
     public function testCastToStringArgumentException()
     {
         $this->expectException(InvalidArgumentException::CLASS);

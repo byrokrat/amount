@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Nothing...
 
+## [2.1.0] - 2019-08-20
+
+### Added
+- Throw a propper exception on division by zero
+
 ## [2.0.0] - 2017-12-06
 
 ### Changed
