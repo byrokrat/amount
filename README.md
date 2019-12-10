@@ -22,7 +22,7 @@ Features
 Installation
 ------------
 ```shell
-composer require byrokrat/amount:^2
+composer require byrokrat/amount
 ```
 
 Usage
