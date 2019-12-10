@@ -12,7 +12,7 @@ class RoundHalfToOddTest extends \PHPUnit\Framework\TestCase
         $precision = 0;
         $expected = 'foobar';
 
-        $toolkit = $this->getMockBuilder(Toolkit::CLASS)->getMock();
+        $toolkit = @$this->getMockBuilder(Toolkit::CLASS)->getMock();
 
         $toolkit->expects($this->once())
             ->method('roundToNearest')
