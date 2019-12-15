@@ -1,3 +1,6 @@
+> ABANDONED! This package is discontinued and will not be updated. See
+> [moneyphp/money](https://packagist.org/packages/moneyphp/money) instead.
+
 # Amount
 
 [![Packagist Version](https://img.shields.io/packagist/v/byrokrat/amount.svg?style=flat-square)](https://packagist.org/packages/byrokrat/amount)
